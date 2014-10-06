@@ -7,6 +7,23 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		FC5CA96B19CC4AD8000B9182 /* MenuCoursesViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FC5CA96A19CC4AD8000B9182 /* MenuCoursesViewController.m */; };
+		FC88DC0B19D57C41003363C6 /* DishOptionsTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = FC88DC0A19D57C41003363C6 /* DishOptionsTableViewCell.m */; };
+		FC88DC0E19D57C5F003363C6 /* DishOptionsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FC88DC0D19D57C5F003363C6 /* DishOptionsViewController.m */; };
+		FC88DC1319D706CD003363C6 /* MenuDishesOptionsTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = FC88DC1219D706CD003363C6 /* MenuDishesOptionsTableViewCell.m */; };
+		FC91485B19CF43ED008E1343 /* ReservationsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FC91485A19CF43ED008E1343 /* ReservationsViewController.m */; };
+		FC91486819D05431008E1343 /* MenuDishesViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FC91486719D05431008E1343 /* MenuDishesViewController.m */; };
+		FC91486B19D056D3008E1343 /* MenuDishesTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = FC91486A19D056D3008E1343 /* MenuDishesTableViewCell.m */; };
+		FCAE169919E2BDE4002C698F /* CourseTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = FCAE169819E2BDE4002C698F /* CourseTableViewCell.m */; };
+		FCBFF45C19C06C4300716463 /* OrdersViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FCBFF45B19C06C4300716463 /* OrdersViewController.m */; };
+		FCBFF46319C08D7200716463 /* OrderItemTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = FCBFF46219C08D7200716463 /* OrderItemTableViewCell.m */; };
+		FCBFF46919C08D9900716463 /* ViewOrderViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FCBFF46819C08D9900716463 /* ViewOrderViewController.m */; };
+		FCCF931119DC5B8200C2F3F2 /* UIColor+ApplicationColours.m in Sources */ = {isa = PBXBuildFile; fileRef = FCCF931019DC5B8200C2F3F2 /* UIColor+ApplicationColours.m */; };
+		FCCF931719E00EB200C2F3F2 /* OrdersCollectionViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = FCCF931619E00EB200C2F3F2 /* OrdersCollectionViewCell.m */; };
+		FCCF931A19E0219100C2F3F2 /* DiscountsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FCCF931919E0219100C2F3F2 /* DiscountsViewController.m */; };
+		FCCF931D19E021D500C2F3F2 /* DiscountsTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = FCCF931C19E021D500C2F3F2 /* DiscountsTableViewCell.m */; };
+		FCCF932119E02E2900C2F3F2 /* SelectDiscountItemsView.m in Sources */ = {isa = PBXBuildFile; fileRef = FCCF932019E02E2900C2F3F2 /* SelectDiscountItemsView.m */; };
+		FCCF932419E02E4600C2F3F2 /* SelectDiscountItemsTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = FCCF932319E02E4600C2F3F2 /* SelectDiscountItemsTableViewCell.m */; };
 		FCD0E3D219C0531900767B4A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = FCD0E3D119C0531900767B4A /* main.m */; };
 		FCD0E3D519C0531900767B4A /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = FCD0E3D419C0531900767B4A /* AppDelegate.m */; };
 		FCD0E3DB19C0531900767B4A /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FCD0E3D919C0531900767B4A /* Main.storyboard */; };
@@ -40,6 +57,40 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		FC5CA96919CC4AD8000B9182 /* MenuCoursesViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MenuCoursesViewController.h; sourceTree = "<group>"; };
+		FC5CA96A19CC4AD8000B9182 /* MenuCoursesViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MenuCoursesViewController.m; sourceTree = "<group>"; };
+		FC88DC0919D57C41003363C6 /* DishOptionsTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DishOptionsTableViewCell.h; sourceTree = "<group>"; };
+		FC88DC0A19D57C41003363C6 /* DishOptionsTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DishOptionsTableViewCell.m; sourceTree = "<group>"; };
+		FC88DC0C19D57C5F003363C6 /* DishOptionsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DishOptionsViewController.h; sourceTree = "<group>"; };
+		FC88DC0D19D57C5F003363C6 /* DishOptionsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DishOptionsViewController.m; sourceTree = "<group>"; };
+		FC88DC1119D706CD003363C6 /* MenuDishesOptionsTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MenuDishesOptionsTableViewCell.h; sourceTree = "<group>"; };
+		FC88DC1219D706CD003363C6 /* MenuDishesOptionsTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MenuDishesOptionsTableViewCell.m; sourceTree = "<group>"; };
+		FC91485919CF43ED008E1343 /* ReservationsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ReservationsViewController.h; sourceTree = "<group>"; };
+		FC91485A19CF43ED008E1343 /* ReservationsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ReservationsViewController.m; sourceTree = "<group>"; };
+		FC91486619D05431008E1343 /* MenuDishesViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MenuDishesViewController.h; sourceTree = "<group>"; };
+		FC91486719D05431008E1343 /* MenuDishesViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MenuDishesViewController.m; sourceTree = "<group>"; };
+		FC91486919D056D3008E1343 /* MenuDishesTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MenuDishesTableViewCell.h; sourceTree = "<group>"; };
+		FC91486A19D056D3008E1343 /* MenuDishesTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MenuDishesTableViewCell.m; sourceTree = "<group>"; };
+		FCAE169719E2BDE4002C698F /* CourseTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CourseTableViewCell.h; sourceTree = "<group>"; };
+		FCAE169819E2BDE4002C698F /* CourseTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CourseTableViewCell.m; sourceTree = "<group>"; };
+		FCBFF45A19C06C4300716463 /* OrdersViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OrdersViewController.h; sourceTree = "<group>"; };
+		FCBFF45B19C06C4300716463 /* OrdersViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OrdersViewController.m; sourceTree = "<group>"; };
+		FCBFF46119C08D7200716463 /* OrderItemTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OrderItemTableViewCell.h; sourceTree = "<group>"; };
+		FCBFF46219C08D7200716463 /* OrderItemTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OrderItemTableViewCell.m; sourceTree = "<group>"; };
+		FCBFF46719C08D9900716463 /* ViewOrderViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ViewOrderViewController.h; sourceTree = "<group>"; };
+		FCBFF46819C08D9900716463 /* ViewOrderViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ViewOrderViewController.m; sourceTree = "<group>"; };
+		FCCF930F19DC5B8200C2F3F2 /* UIColor+ApplicationColours.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIColor+ApplicationColours.h"; sourceTree = "<group>"; };
+		FCCF931019DC5B8200C2F3F2 /* UIColor+ApplicationColours.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIColor+ApplicationColours.m"; sourceTree = "<group>"; };
+		FCCF931519E00EB200C2F3F2 /* OrdersCollectionViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OrdersCollectionViewCell.h; sourceTree = "<group>"; };
+		FCCF931619E00EB200C2F3F2 /* OrdersCollectionViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OrdersCollectionViewCell.m; sourceTree = "<group>"; };
+		FCCF931819E0219100C2F3F2 /* DiscountsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DiscountsViewController.h; sourceTree = "<group>"; };
+		FCCF931919E0219100C2F3F2 /* DiscountsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DiscountsViewController.m; sourceTree = "<group>"; };
+		FCCF931B19E021D500C2F3F2 /* DiscountsTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DiscountsTableViewCell.h; sourceTree = "<group>"; };
+		FCCF931C19E021D500C2F3F2 /* DiscountsTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DiscountsTableViewCell.m; sourceTree = "<group>"; };
+		FCCF931F19E02E2900C2F3F2 /* SelectDiscountItemsView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SelectDiscountItemsView.h; sourceTree = "<group>"; };
+		FCCF932019E02E2900C2F3F2 /* SelectDiscountItemsView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SelectDiscountItemsView.m; sourceTree = "<group>"; };
+		FCCF932219E02E4600C2F3F2 /* SelectDiscountItemsTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SelectDiscountItemsTableViewCell.h; sourceTree = "<group>"; };
+		FCCF932319E02E4600C2F3F2 /* SelectDiscountItemsTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SelectDiscountItemsTableViewCell.m; sourceTree = "<group>"; };
 		FCD0E3CC19C0531900767B4A /* Waiter.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Waiter.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		FCD0E3D019C0531900767B4A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		FCD0E3D119C0531900767B4A /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
@@ -100,6 +151,84 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		FC5CA96C19CC4AE2000B9182 /* Menu */ = {
+			isa = PBXGroup;
+			children = (
+				FC88DC1019D57C6D003363C6 /* Course */,
+				FC88DC0F19D57C68003363C6 /* Dish */,
+			);
+			name = Menu;
+			sourceTree = "<group>";
+		};
+		FC88DC0F19D57C68003363C6 /* Dish */ = {
+			isa = PBXGroup;
+			children = (
+				FC91486619D05431008E1343 /* MenuDishesViewController.h */,
+				FC91486719D05431008E1343 /* MenuDishesViewController.m */,
+				FC91486919D056D3008E1343 /* MenuDishesTableViewCell.h */,
+				FC91486A19D056D3008E1343 /* MenuDishesTableViewCell.m */,
+				FC88DC1119D706CD003363C6 /* MenuDishesOptionsTableViewCell.h */,
+				FC88DC1219D706CD003363C6 /* MenuDishesOptionsTableViewCell.m */,
+				FC88DC0C19D57C5F003363C6 /* DishOptionsViewController.h */,
+				FC88DC0D19D57C5F003363C6 /* DishOptionsViewController.m */,
+				FC88DC0919D57C41003363C6 /* DishOptionsTableViewCell.h */,
+				FC88DC0A19D57C41003363C6 /* DishOptionsTableViewCell.m */,
+			);
+			name = Dish;
+			sourceTree = "<group>";
+		};
+		FC88DC1019D57C6D003363C6 /* Course */ = {
+			isa = PBXGroup;
+			children = (
+				FC5CA96919CC4AD8000B9182 /* MenuCoursesViewController.h */,
+				FC5CA96A19CC4AD8000B9182 /* MenuCoursesViewController.m */,
+				FCAE169719E2BDE4002C698F /* CourseTableViewCell.h */,
+				FCAE169819E2BDE4002C698F /* CourseTableViewCell.m */,
+			);
+			name = Course;
+			sourceTree = "<group>";
+		};
+		FC91485C19CF43F6008E1343 /* Reservations */ = {
+			isa = PBXGroup;
+			children = (
+				FC91485919CF43ED008E1343 /* ReservationsViewController.h */,
+				FC91485A19CF43ED008E1343 /* ReservationsViewController.m */,
+			);
+			name = Reservations;
+			sourceTree = "<group>";
+		};
+		FCBFF45D19C06C4800716463 /* Orders */ = {
+			isa = PBXGroup;
+			children = (
+				FCBFF45A19C06C4300716463 /* OrdersViewController.h */,
+				FCBFF45B19C06C4300716463 /* OrdersViewController.m */,
+				FCCF931519E00EB200C2F3F2 /* OrdersCollectionViewCell.h */,
+				FCCF931619E00EB200C2F3F2 /* OrdersCollectionViewCell.m */,
+				FCBFF46719C08D9900716463 /* ViewOrderViewController.h */,
+				FCBFF46819C08D9900716463 /* ViewOrderViewController.m */,
+				FCBFF46119C08D7200716463 /* OrderItemTableViewCell.h */,
+				FCBFF46219C08D7200716463 /* OrderItemTableViewCell.m */,
+				FCCF931E19E021DE00C2F3F2 /* Discounts */,
+				FC5CA96C19CC4AE2000B9182 /* Menu */,
+			);
+			name = Orders;
+			sourceTree = "<group>";
+		};
+		FCCF931E19E021DE00C2F3F2 /* Discounts */ = {
+			isa = PBXGroup;
+			children = (
+				FCCF931819E0219100C2F3F2 /* DiscountsViewController.h */,
+				FCCF931919E0219100C2F3F2 /* DiscountsViewController.m */,
+				FCCF931B19E021D500C2F3F2 /* DiscountsTableViewCell.h */,
+				FCCF931C19E021D500C2F3F2 /* DiscountsTableViewCell.m */,
+				FCCF931F19E02E2900C2F3F2 /* SelectDiscountItemsView.h */,
+				FCCF932019E02E2900C2F3F2 /* SelectDiscountItemsView.m */,
+				FCCF932219E02E4600C2F3F2 /* SelectDiscountItemsTableViewCell.h */,
+				FCCF932319E02E4600C2F3F2 /* SelectDiscountItemsTableViewCell.m */,
+			);
+			name = Discounts;
+			sourceTree = "<group>";
+		};
 		FCD0E3C319C0531900767B4A = {
 			isa = PBXGroup;
 			children = (
@@ -135,6 +264,8 @@
 			children = (
 				FCD0E3D319C0531900767B4A /* AppDelegate.h */,
 				FCD0E3D419C0531900767B4A /* AppDelegate.m */,
+				FCCF930F19DC5B8200C2F3F2 /* UIColor+ApplicationColours.h */,
+				FCCF931019DC5B8200C2F3F2 /* UIColor+ApplicationColours.m */,
 				FCD0E3D019C0531900767B4A /* Info.plist */,
 				FCD0E3D119C0531900767B4A /* main.m */,
 			);
@@ -198,6 +329,8 @@
 			isa = PBXGroup;
 			children = (
 				FCD0E41B19C0547200767B4A /* Authentication */,
+				FCBFF45D19C06C4800716463 /* Orders */,
+				FC91485C19CF43F6008E1343 /* Reservations */,
 				FCD0E42019C05AD900767B4A /* Settings */,
 			);
 			name = Controller;
@@ -263,6 +396,7 @@
 				TargetAttributes = {
 					FCD0E3CB19C0531900767B4A = {
 						CreatedOnToolsVersion = 6.0;
+						DevelopmentTeam = 5D6MUHPE98;
 					};
 					FCD0E3E119C0531A00767B4A = {
 						CreatedOnToolsVersion = 6.0;
@@ -313,10 +447,27 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FCCF931719E00EB200C2F3F2 /* OrdersCollectionViewCell.m in Sources */,
+				FC91486819D05431008E1343 /* MenuDishesViewController.m in Sources */,
+				FC88DC0B19D57C41003363C6 /* DishOptionsTableViewCell.m in Sources */,
+				FCCF932419E02E4600C2F3F2 /* SelectDiscountItemsTableViewCell.m in Sources */,
+				FC91485B19CF43ED008E1343 /* ReservationsViewController.m in Sources */,
+				FCBFF46319C08D7200716463 /* OrderItemTableViewCell.m in Sources */,
+				FC91486B19D056D3008E1343 /* MenuDishesTableViewCell.m in Sources */,
+				FCBFF46919C08D9900716463 /* ViewOrderViewController.m in Sources */,
+				FCCF931119DC5B8200C2F3F2 /* UIColor+ApplicationColours.m in Sources */,
 				FCD0E3D519C0531900767B4A /* AppDelegate.m in Sources */,
+				FC5CA96B19CC4AD8000B9182 /* MenuCoursesViewController.m in Sources */,
+				FCBFF45C19C06C4300716463 /* OrdersViewController.m in Sources */,
+				FC88DC0E19D57C5F003363C6 /* DishOptionsViewController.m in Sources */,
+				FCCF931D19E021D500C2F3F2 /* DiscountsTableViewCell.m in Sources */,
 				FCD0E42319C05B9400767B4A /* WaiterViewController.m in Sources */,
+				FCCF931A19E0219100C2F3F2 /* DiscountsViewController.m in Sources */,
+				FCAE169919E2BDE4002C698F /* CourseTableViewCell.m in Sources */,
 				FCD0E3D219C0531900767B4A /* main.m in Sources */,
 				FCD0E41A19C0546D00767B4A /* LoginViewController.m in Sources */,
+				FC88DC1319D706CD003363C6 /* MenuDishesOptionsTableViewCell.m in Sources */,
+				FCCF932119E02E2900C2F3F2 /* SelectDiscountItemsView.m in Sources */,
 				FCD0E41F19C05AD500767B4A /* SettingsViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -432,6 +583,8 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"/Users/dylan/Dropbox/Developer/Frameworks/parse-library-1",
@@ -439,6 +592,8 @@
 				INFOPLIST_FILE = Waiter/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -447,6 +602,8 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"/Users/dylan/Dropbox/Developer/Frameworks/parse-library-1",
@@ -454,6 +611,8 @@
 				INFOPLIST_FILE = Waiter/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};
@@ -510,6 +669,7 @@
 				FCD0E3EE19C0531A00767B4A /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		FCD0E3EF19C0531A00767B4A /* Build configuration list for PBXNativeTarget "WaiterTests" */ = {
 			isa = XCConfigurationList;
@@ -518,6 +678,7 @@
 				FCD0E3F119C0531A00767B4A /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

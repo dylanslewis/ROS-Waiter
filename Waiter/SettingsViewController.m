@@ -8,6 +8,7 @@
 
 #import "SettingsViewController.h"
 
+
 @interface SettingsViewController ()
 @property (weak, nonatomic) IBOutlet UILabel *usernameLabel;
 @property (weak, nonatomic) IBOutlet UILabel *restaurantNameLabel;
@@ -18,6 +19,8 @@
 @end
 
 @implementation SettingsViewController
+
+@synthesize logoutWaiterButton=_logoutWaiterButton;
 
 #pragma mark - Setup
 

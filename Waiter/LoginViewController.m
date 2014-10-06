@@ -41,6 +41,7 @@
     
     // Hide the spinner at first.
     [[self spinner] setHidden:YES];
+    [_loginButton setHidden:NO];
     
 }
 

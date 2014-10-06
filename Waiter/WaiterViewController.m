@@ -48,6 +48,12 @@
 }
 
 
+#pragma mark - Button handling
+
+- (IBAction)didTouchCancelButton:(id)sender {
+    [self dismissViewControllerAnimated:YES completion:nil];
+}
+
 #pragma mark - Parse
 
 - (void)objectsDidLoad:(NSError *)error {
@@ -97,7 +103,22 @@
     return NO;
 }
 
-
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+    [super tableView:tableView didSelectRowAtIndexPath:indexPath];
+    
+    PFObject *selectedWaiter = [self objectAtIndexPath:indexPath];
+    NSString *selectedWaiterObjectID = selectedWaiter.objectId;
+    
+    // Using the selected waiter object ID, store the ID in NSUserDefaults.
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    [defaults setValue:selectedWaiterObjectID forKey:@"currentWaiterID"];
+    [defaults synchronize];
+    
+    // Inform the order View that there is a change to waiter.
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"newWaiterLoggedIn" object:nil];
+    
+    [self dismissViewControllerAnimated:YES completion:nil];
+}
 
 #pragma mark - Navigation
 

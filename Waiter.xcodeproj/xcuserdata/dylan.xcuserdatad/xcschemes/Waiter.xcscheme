@@ -51,6 +51,11 @@
                BlueprintName = "WaiterTests"
                ReferencedContainer = "container:Waiter.xcodeproj">
             </BuildableReference>
+            <SkippedTests>
+               <Test
+                  Identifier = "PFUserTests">
+               </Test>
+            </SkippedTests>
          </TestableReference>
       </Testables>
       <MacroExpansion>
