@@ -50,6 +50,7 @@
     if ([_selectedItems count]>0) {
         NSArray *items = [[NSArray alloc] initWithArray:_selectedItems];
         
+        // Pass the selected objects to the previous view.
         [[NSNotificationCenter defaultCenter] postNotificationName:@"didSelectItemsToDiscount" object:items];
     }
     
@@ -68,6 +69,7 @@
     
     SelectDiscountItemsTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
     
+    // Work out if the item has options.
     if ([[orderItem[@"option"] allKeys] count]>0) {
         // This means the order item has options.
         
@@ -77,10 +79,8 @@
         // Concatenate the option name string with the dish name string: Option DishName.
         NSString *concatenatedString = [NSString stringWithFormat:@"%@ %@", [[optionKeyValuePair allKeys] firstObject], [orderItem valueForKey:@"name"]];
         
-        // Set basic attributations.
+        // Set basic attributes.
         NSMutableAttributedString *dishNameWithOption = [[NSMutableAttributedString alloc] initWithString:concatenatedString];
-        
-        #warning Font attribute not working
         [dishNameWithOption addAttribute:NSFontAttributeName value:[UIFont fontWithName:@"HelveticaNeue-Light" size:20.0f] range:NSMakeRange(0, [dishNameWithOption length])];
         
         // Set the option name to blue.
@@ -97,9 +97,11 @@
         cell.dishNameLabel.attributedText = dishName;
     }
     
+    // Initially assume the item isn't checked.
     cell.accessoryType = UITableViewCellAccessoryNone;
     
     // Look through the array of selected items, and update the UI to show which order items are selected.
+    // THIS DOESN'T WORK!!!
     for (PFObject *selectedItem in _selectedItems) {
         if ([selectedItem isEqual:orderItem]) {
             cell.accessoryType = UITableViewCellAccessoryCheckmark;
@@ -170,6 +172,7 @@
 #pragma mark - Parse
 
 - (void)getParseData {
+    // Get order items belonging to this order.
     PFQuery *getOrderItems = [PFQuery queryWithClassName:@"OrderItem"];
     [getOrderItems whereKey:@"forOrder" equalTo:_currentOrder];
     

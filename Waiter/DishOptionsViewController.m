@@ -51,6 +51,7 @@
 - (IBAction)didTouchSelectOptionButton:(id)sender {
     DishOptionsTableViewCell *touchedCell = (DishOptionsTableViewCell *)[[sender superview] superview];
     
+    // Work out if this option has already been ordered.
     if ([touchedCell hasBeenOrdered]) {
         [self incrementQuantityOfOrderItem:touchedCell.orderItemObject];
     } else {
@@ -80,6 +81,7 @@
     if ([[_alreadyOrderedOptions allKeys] containsObject:[optionName string]]) {
         cell.hasBeenOrdered = YES;
         
+        // Loop through all ordered objects, looking for one that matches the current cell.
         for (PFObject *orderedItem in _orderedObjects) {
             NSDictionary *option = orderedItem[@"option"];
             
@@ -122,6 +124,7 @@
 #pragma mark - Parse
 
 - (void)addOrderItemToOrderWithOption:(NSDictionary *)option {
+    // The Option hasn't been ordered before, so create the object.
     PFObject *orderItem = [PFObject objectWithClassName:@"OrderItem"];
     orderItem[@"quantity"]=@1;
     
@@ -148,6 +151,7 @@
 }
 
 - (void)incrementQuantityOfOrderItem:(PFObject *)orderedItem {
+    // The item has already been ordered, so just update the quantity.
     orderedItem[@"quantity"] = [NSNumber numberWithInt:[[orderedItem valueForKey:@"quantity"] intValue] + 1];
     
     [orderedItem saveInBackgroundWithBlock:^(BOOL succeeded, NSError *error) {

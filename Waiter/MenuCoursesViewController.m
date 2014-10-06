@@ -114,14 +114,17 @@
 #pragma mark - Table view
 
 - (PFObject *)objectAtIndexPath:(NSIndexPath *)indexPath {
+    // Work out if the object is food or drink.
     if ([indexPath section]==0) {
         // This means the object is a Drink, because 'D' comes before 'F' in the alphabet.
         return [self.objects objectAtIndex:[indexPath row]];
     } else {
         // This means the object is Food.
+        
         // Get the number of objects that are 'Drink'.
         NSInteger numberOfDrinkObjects = [[_coursesByType valueForKey:@"Drink"] count];
         
+        // Work out the position in an unorganised array of this Food object.
         NSInteger flattenedIndex = numberOfDrinkObjects + [indexPath row];
         
         return [self.objects objectAtIndex:flattenedIndex];
@@ -172,6 +175,7 @@
     
     CourseTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
     
+    // Extract the name of this section by looking in the Dictionary's keys.
     NSString *keyForSection = [[_coursesByType allKeys] objectAtIndex:[indexPath section]];
     
     PFObject *course = [[_coursesByType valueForKey:keyForSection] objectAtIndex:[indexPath row]];

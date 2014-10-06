@@ -42,10 +42,13 @@
     
     [_previousOrderTotalPriceLabel setHidden:YES];
     
+    // Listen to updates for Order Items
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getParseData) name:@"addedItemToOrder" object:nil];
     
+    // Listen to updates to Discounts.
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getParseData) name:@"updatedDiscounts" object:nil];
     
+    // Get Order information.
     [self getParseData];
 }
 
@@ -135,6 +138,7 @@
 #pragma mark - Parse
 
 - (void)getParseData {
+    // Get order items for this order.
     PFQuery *getOrderItems = [PFQuery queryWithClassName:@"OrderItem"];
     [getOrderItems whereKey:@"forOrder" equalTo:_currentOrder];
     
@@ -144,6 +148,7 @@
             _orderItemsArray = [[NSArray alloc] initWithArray:orderItems];
             _orderItemSections = [[NSMutableDictionary alloc] init];
             
+            // Reset the total bill amount.
             _totalBill = @0;
             
             // Go through the 'raw' list of order items.
@@ -153,6 +158,7 @@
                 
                 NSNumber *currentOrderItemPrice = [[NSNumber alloc] initWithFloat:[orderItem[@"price"] floatValue] * [orderItem[@"quantity"] floatValue]];
                 
+                // Add the current total bill to the (current item price * quantity).
                 _totalBill = [[NSNumber alloc] initWithFloat:[currentOrderItemPrice floatValue] + [_totalBill floatValue]];
                 
                 // Group all drinks together.
@@ -175,16 +181,20 @@
                 }
             }
             
+            // Display the order price label.
             _orderTotalPriceLabel.text = [NSString stringWithFormat:@"£%@", _totalBill];
             
+            // Download discount objects.
             [self getDiscounts];
         }
         
+        // Reload the table.
         [orderItemsTableView reloadData];
     }];
 }
 
 - (void)deleteOrderItemAndDiscountObjectsForOrder:(PFObject *)order {
+    // Delete all objects associated with this Order.
     PFQuery *getOrderItems = [PFQuery queryWithClassName:@"OrderItem"];
     [getOrderItems whereKey:@"forOrder" equalTo:order];
     
@@ -322,9 +332,11 @@
     NSNumber *discountAmount;
     NSNumber *percentage;
     
+    // Look through all the discount objects.
     for (PFObject *discount in discounts) {
         NSNumber *totalValueOfItemsBeforeDiscount;
         
+        // Work out the coverage of the discount.
         if ([[discount valueForKey:@"coverage"] isEqualToString:@"total"]) {
             // This discount covers the whole bill.
             totalValueOfItemsBeforeDiscount = newBillPrice;
@@ -333,6 +345,7 @@
             totalValueOfItemsBeforeDiscount = discount[@"totalValueOfItems"];
         }
         
+        // Work out the type of discount, amount or percentage.
         if ([[discount valueForKey:@"type"] isEqualToString:@"amount"]) {
             // This is an amount deduction.
             discountAmount = [discount valueForKey:@"amount"];
@@ -356,11 +369,13 @@
         newBillPrice = [[NSNumber alloc] initWithFloat:[newBillPrice floatValue] - [discountAmount floatValue]];
     }
     
+    // Update labels.
     [_orderTotalPriceLabel setText:[NSString stringWithFormat:@"£%@", newBillPrice]];
     [_previousOrderTotalPriceLabel setHidden:NO];
     
     NSNumber *priceDifference = @([_totalBill floatValue] - [newBillPrice floatValue]);
     
+    // Show the original total price and the amount of deductions applied.
     NSMutableAttributedString *billCalculationString = [[NSMutableAttributedString alloc] initWithString:[NSString stringWithFormat:@"£%@ - £%@", _totalBill, priceDifference]];
     [billCalculationString addAttribute:NSFontAttributeName value:[UIFont fontWithName:@"HelveticaNeue-Thin" size:14.0f] range:NSMakeRange(0, [billCalculationString length])];
     

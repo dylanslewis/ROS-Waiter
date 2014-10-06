@@ -31,7 +31,7 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
 
-    // Set  placeholders.
+    // Set placeholders.
     [_usernameField setPlaceholder:@"username"];
     [_passwordField setPlaceholder:@"password"];
     
@@ -54,9 +54,11 @@
 #pragma mark - Button handling
 
 - (IBAction)didTouchLoginButton:(id)sender {
+    // Extract the user-entered data.
     NSString *username=[_usernameField text];
     NSString *password=[_passwordField text];
     
+    // Attempt to login.
     [self loginUserWithUsername:username withPassword:password];
 }
 

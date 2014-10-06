@@ -27,9 +27,11 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-        
+    
+    // Set the title to the current course name.
     self.title = [_currentCourse objectForKey:@"name"];
     
+    // Listen for changes to the order.
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getParseData) name:@"addedItemToOrder" object:nil];
     
     [self getParseData];
@@ -93,6 +95,7 @@
 }
 
 - (IBAction)minusDishButtonTouched:(id)sender {
+    // Get the cell that was just touched.
     _touchedCell = (MenuDishesTableViewCell *)[[sender superview] superview];
     
     // Safety check.
@@ -121,6 +124,8 @@
 }
 
 - (IBAction)optionPlusButtonTouched:(id)sender {
+    // This happens when the user touches the 'plus' of an option, as opposed to an Order Item. Increment the quantity.
+    
     // Get the cell that the button was touched on.
     _touchedCell = (MenuDishesTableViewCell *)[[sender superview] superview];
     
@@ -136,6 +141,7 @@
 }
 
 - (IBAction)optionMinusButtonTouched:(id)sender {
+    // If the user sets the quantity to zero for this option, delete it from the order.
     _touchedCell = (MenuDishesTableViewCell *)[[sender superview] superview];
     
     // Safety check.
@@ -158,6 +164,7 @@
         }];
     }
     
+    // Update View Order UI.
     [[NSNotificationCenter defaultCenter] postNotificationName:@"addedItemToOrder" object:nil];
 }
 
@@ -253,6 +260,7 @@
                 }
             }
             
+            // Update table.
             [self.tableView reloadData];
         }
     }];
@@ -264,6 +272,11 @@
     static NSString *CellIdentifier = @"dishCell";
     static NSString *OptionCellIdentifier = @"dishOptionCell";
     
+    // There are three posibilities for cells in this table:
+    // - Dish object: an item on the menu that hasn't been ordered, shown in green.
+    // - Order Item object: an item on the menu that HAS been ordered, shown in blue
+    // - Order Item Option: an option of a Dish that has been ordered, also shown in blue.
+    
     // Get the object from the array.
     PFObject *currentObject = [_objects objectAtIndex:[indexPath row]];
     
@@ -272,10 +285,11 @@
         // This is a pure option cell, that shows no dish name, just the option name (indented).
         MenuDishesOptionsTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:OptionCellIdentifier];
         
+        // Update the dish name label.
         NSMutableAttributedString *dishString = [[NSMutableAttributedString alloc] initWithString:[[currentObject[@"option"] allKeys] firstObject]];
         [dishString addAttribute:NSFontAttributeName value:[UIFont fontWithName:@"HelveticaNeue-Light" size:18.0f] range:NSMakeRange(0, [dishString length])];
         
-        
+        // Set the cell's values.
         cell.dishOptionNameLabel.attributedText = dishString;
         cell.priceLabel.text = [NSString stringWithFormat:@"£%@", [currentObject[@"option"] valueForKey:cell.dishOptionNameLabel.text]];
         cell.quantityLabel.text = [NSString stringWithFormat:@"%@ x", currentObject[@"quantity"]];
@@ -306,6 +320,7 @@
         cell.dishNameLabel.attributedText = dishString;
         cell.dishQuantityLabel.text = @"";
         
+        // Check if the Dish has options.
         if ([[cell.dishObject[@"options"] allKeys] count]==0) {
             // This dish cell doesn't have options.
             cell.dishPriceLabel.text = [NSString stringWithFormat:@"£%@", [cell.dishObject valueForKey:@"price"]];

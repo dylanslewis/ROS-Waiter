@@ -34,6 +34,7 @@
     
     [self getParseData];
     
+    // Update placeholders.
     [_discountAmountTextField setPlaceholder:@"amount"];
     [_discountAmountTextField setKeyboardType:UIKeyboardTypeDecimalPad];
     
@@ -41,6 +42,7 @@
     
     [_selectItemsButton setHidden:YES];
     
+    // Listen to updates about selected items to discount.
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(saveSelectedItems:) name:@"didSelectItemsToDiscount" object:nil];
     
     [discountsTableView setHidden:YES];
@@ -54,11 +56,9 @@
 #pragma mark - Button handling
 
 - (IBAction)didChangeDiscountCoverageControl:(id)sender {
+    // Hide or show the select items button, depending on the coverage option set.
     if ([_discountCoverageControl selectedSegmentIndex]==0) {
         [_selectItemsButton setHidden:YES];
-        
-        
-        // Update reduction description label.
     } else {
         [_selectItemsButton setHidden:NO];
     }
@@ -69,22 +69,26 @@
     NSNumber *amount;
     NSString *type;
     
+    // Extract the coverage of the disccount.
     if ([_discountCoverageControl selectedSegmentIndex]==0) {
         coverage = @"total";
     } else {
         coverage = @"partial";
     }
     
+    // Extract the type of discount.
     if ([_discountTypeControl selectedSegmentIndex]==0) {
         type = @"amount";
     } else {
         type = @"percentage";
     }
     
+    // Get the amount from the text field.
     amount = (NSNumber *)[_discountAmountTextField text];
     
     [self applyNewDiscountToCover:coverage withType:type withAmount:amount];
 
+    // Reset fields.
     [_discountAmountTextField resignFirstResponder];
     [_discountAmountTextField setText:@""];
     [_applyDiscountButton setTitle:@"Apply Discount" forState:UIControlStateNormal];
@@ -94,11 +98,13 @@
 }
 
 - (IBAction)didTouchDeleteDiscountButton:(id)sender {
+    // Delete the discount of the current cell.
     DiscountsTableViewCell *touchedCell = (DiscountsTableViewCell *)[[sender superview] superview];
     
     PFObject *discount = [touchedCell discount];
     
     [discount deleteInBackgroundWithBlock:^(BOOL succeeded, NSError *error) {
+        // Update data.
         [self getParseData];
     }];
 }
@@ -109,7 +115,8 @@
     _selectedItems = (NSArray *)notification.object;
 
     NSString *discountString = [NSString stringWithFormat:@"Apply Discount to %lu Items", (unsigned long)[_selectedItems count]];
-    
+
+    // Update the button to show the user how many items are having a discount applied to them.
     [_applyDiscountButton setTitle:discountString forState:UIControlStateNormal];
 }
 
@@ -124,18 +131,21 @@
     
     DiscountsTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
     
+    // Get the discount object from the array.
     PFObject *discount = [_discountObjects objectAtIndex:[indexPath row]];
     
     cell.discount = discount;
     
     NSString *amountAndType;
     
+    // Create the appropriate string, depending on the type of discount.
     if ([[discount objectForKey:@"type"] isEqualToString:@"amount"]) {
         amountAndType = [NSString stringWithFormat:@"£%@", [discount objectForKey:@"amount"]];
     } else {
         amountAndType = [NSString stringWithFormat:@"%@%%", [discount objectForKey:@"amount"]];
     }
     
+    // Concatenate the amountAndType string to a string describing the coverage of the discount;.
     if ([[discount objectForKey:@"coverage"] isEqualToString:@"total"]) {
         cell.offerDescriptionLabel.text = [NSString stringWithFormat:@"%@ discount on the total bill", amountAndType];
     } else {
@@ -152,6 +162,7 @@
 #pragma mark - Parse
 
 - (void)applyNewDiscountToCover:(NSString *)coverage withType:(NSString *)type withAmount:(NSNumber *)amount {
+    // Create a new discount for this Order.
     PFObject *discount = [PFObject objectWithClassName:@"Discount"];
     
     discount[@"coverage"] = coverage;
@@ -169,6 +180,7 @@
             totalValueOfDiscountedItems = [[NSNumber alloc] initWithFloat:([totalValueOfDiscountedItems floatValue] + [currentItemValue floatValue])];
         }
         
+        // Get the total number of items that this discount applies to. Maybe change this to multiply by quantity?
         NSNumber *totalNumberOfItems = [[NSNumber alloc] initWithInteger:[_selectedItems count]];
         
         discount[@"totalValueOfItems"] = totalValueOfDiscountedItems;
@@ -178,9 +190,7 @@
     discount[@"type"] = type;
     discount[@"amount"] = amount;
     
-    
-    
-    // Relate this new order to the currently logged in Waiter.
+    // Relate this new discount to the current Order.
     discount[@"forOrder"] = _currentOrder;
     
     // Add ACL permissions for added security.

@@ -42,8 +42,10 @@
     // Listen to updates about the current waiter.
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateUIForWaiter) name:@"newWaiterLoggedIn" object:nil];
     
+    // Listen to upadates about Orders.
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getParseData) name:@"orderChange" object:nil];
     
+    // Display the current waiter's name in the title and enable editing.
     [self updateUIForWaiter];
 }
 
@@ -88,7 +90,7 @@
             NSLog(@"%@", error);
         }
         
-        // Only show the table view if there are objects to display.
+        // Only show the list of orders if there are objects to display.
         if ([_ordersArray count]) {
             [ordersCollectionView setHidden:NO];
             [ordersCollectionView reloadData];
@@ -143,7 +145,7 @@
 {
     if ([alertView.title isEqualToString:@"Create new order"]) {
         if (buttonIndex==1) {
-            // Create the new order with the current time as orderDate.
+            // Create the new order, setting the inputted table number.
             NSString *tableNumber = [_alertView textFieldAtIndex:0].text;
             
             [self createNewOrderWithTableNumber:tableNumber];
@@ -155,6 +157,7 @@
 #pragma mark - Parse
 
 - (void)createNewOrderWithTableNumber:(NSString *)tableNumber {
+    // Set basic Order attributes.
     PFObject *order = [PFObject objectWithClassName:_className];
     order[@"tableNumber"]=tableNumber;
     order[@"state"]=@"new";
