@@ -226,6 +226,10 @@
             if ([discountItems count]==0) {
                 [_previousOrderTotalPriceLabel setHidden:YES];
                 [_discountsButton setTitle:@"Discounts" forState:UIControlStateNormal];
+                
+                // Update order variables.
+                _currentOrder[@"totalPrice"] = _totalBill;
+                [_currentOrder saveInBackground];
             } else {
                 [self calculateDiscountsForBill:_totalBill withDiscounts:discountItems];
                 [_discountsButton setTitle:[NSString stringWithFormat:@"Discounts (%lu)", (unsigned long)[discountItems count]] forState:UIControlStateNormal];
@@ -372,6 +376,9 @@
     // Update labels.
     [_orderTotalPriceLabel setText:[NSString stringWithFormat:@"£%@", newBillPrice]];
     [_previousOrderTotalPriceLabel setHidden:NO];
+    
+    _currentOrder[@"totalPrice"] = newBillPrice;
+    [_currentOrder saveInBackground];
     
     NSNumber *priceDifference = @([_totalBill floatValue] - [newBillPrice floatValue]);
     

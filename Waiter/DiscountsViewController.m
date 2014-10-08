@@ -35,7 +35,6 @@
     [self getParseData];
     
     // Update placeholders.
-    [_discountAmountTextField setPlaceholder:@"amount"];
     [_discountAmountTextField setKeyboardType:UIKeyboardTypeDecimalPad];
     
     [_applyOfferCodeButton setUserInteractionEnabled:NO];

@@ -30,10 +30,6 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-
-    // Set placeholders.
-    [_usernameField setPlaceholder:@"username"];
-    [_passwordField setPlaceholder:@"password"];
     
     // Fix the keyboard and text entry types.
     [_usernameField setAutocorrectionType:UITextAutocorrectionTypeNo];

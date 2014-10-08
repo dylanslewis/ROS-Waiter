@@ -162,6 +162,7 @@
     order[@"tableNumber"]=tableNumber;
     order[@"state"]=@"new";
     order[@"totalPrice"]=@0.00;
+    order[@"waiterName"] = [NSString stringWithFormat:@"%@ %@", _currentWaiter[@"firstName"], _currentWaiter[@"surname"]];
      
     // Relate this new order to the currently logged in Waiter.
     order[@"forWaiter"] = _currentWaiter;
