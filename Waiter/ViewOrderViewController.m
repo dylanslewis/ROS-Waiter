@@ -322,9 +322,40 @@
         cell.orderItemNameLabel.attributedText = dishName;
     }
     
+    if ([orderItem[@"state"] isEqualToString:@"delivered"]) {
+        // Set basic attributations.
+        NSMutableAttributedString *state = [[NSMutableAttributedString alloc] initWithString:@"delivered"];
+        [state addAttribute:NSFontAttributeName value:[UIFont fontWithName:@"HelveticaNeue-Light" size:10] range:NSMakeRange(0, [state length])];
+        [state addAttribute:NSForegroundColorAttributeName value:[UIColor kitchenBlueColour] range:NSMakeRange(0, [state length])];
+        
+        cell.orderItemStateLabel.attributedText = state;
+    } else if ([orderItem[@"state"] isEqualToString:@"accepted"]) {
+        // Work out the time until completion.
+        NSDate *currentDate = [NSDate date];
+        NSDate *completionDate = (NSDate *)orderItem[@"estimatedCompletionTime"];
+        NSTimeInterval secondsBetween = [completionDate timeIntervalSinceDate:currentDate];
+        
+        int numberOfMinutes = secondsBetween / 60;
+        
+        // Set basic attributations.
+        NSMutableAttributedString *state = [[NSMutableAttributedString alloc] initWithString:[NSString stringWithFormat:@"%d mins", numberOfMinutes]];
+        [state addAttribute:NSFontAttributeName value:[UIFont fontWithName:@"HelveticaNeue-Light" size:10] range:NSMakeRange(0, [state length])];
+        [state addAttribute:NSForegroundColorAttributeName value:[UIColor waiterGreenColour] range:NSMakeRange(0, [state length])];
+        
+        cell.orderItemStateLabel.attributedText = state;
+    } else if ([orderItem[@"state"] isEqualToString:@"rejected"]) {
+        // Set basic attributations.
+        NSMutableAttributedString *state = [[NSMutableAttributedString alloc] initWithString:@"rejected"];
+        [state addAttribute:NSFontAttributeName value:[UIFont fontWithName:@"HelveticaNeue-Light" size:10] range:NSMakeRange(0, [state length])];
+        [state addAttribute:NSForegroundColorAttributeName value:[UIColor managerRedColour] range:NSMakeRange(0, [state length])];
+        
+        cell.orderItemStateLabel.attributedText = state;
+    } else {
+        [cell.orderItemStateLabel setHidden:YES];
+    }
+    
     cell.orderItemPriceLabel.text = [NSString stringWithFormat:@"£%@", [orderItem objectForKey:@"price"]];
     cell.orderItemQuantityLabel.text = [NSString stringWithFormat:@"%@ x", [orderItem objectForKey:@"quantity"]];
-    cell.orderItemStateLabel.text = @"15 mins";
     
     return cell;
 }

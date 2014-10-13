@@ -108,7 +108,9 @@
                 [self getParseData];
             }];
             
+            ////
             // Delete any discounts associated with this item.
+            ////
             
         } else {
             // Decrement the quantity.
@@ -181,6 +183,8 @@
     orderItem[@"type"] = [dish valueForKey:@"type"];
     orderItem[@"forOrder"] = _currentOrder;
     orderItem[@"price"] = [dish valueForKey:@"price"];
+    orderItem[@"state"] = @"new";
+    orderItem[@"tableNumber"] = _currentOrder[@"tableNumber"];
     
     orderItem[@"course"] = [_currentCourse valueForKey:@"name"];
     

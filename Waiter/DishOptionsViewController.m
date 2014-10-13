@@ -135,6 +135,8 @@
     orderItem[@"forOrder"] = _currentOrder;
     orderItem[@"option"] = option;
     orderItem[@"price"] = [[option allValues] firstObject];
+    orderItem[@"state"] = @"new";
+    orderItem[@"tableNumber"] = _currentOrder[@"tableNumber"];
     
     orderItem[@"course"] = [_currentCourse valueForKey:@"name"];
     
