@@ -14,6 +14,7 @@
 @property (weak, nonatomic) IBOutlet UILabel *dishPriceLabel;
 @property (weak, nonatomic) IBOutlet UILabel *dishQuantityLabel;
 @property (weak, nonatomic) IBOutlet UILabel *fromLabel;
+@property (weak, nonatomic) IBOutlet UILabel *alreadySeenLabel;
 
 @property (weak, nonatomic) IBOutlet UIButton *minusDishButton;
 @property (weak, nonatomic) IBOutlet UIButton *addDishButton;
@@ -21,6 +22,6 @@
 @property (weak, nonatomic) PFObject *dishObject;
 @property (weak, nonatomic) PFObject *orderItemObject;
 
-@property (nonatomic) BOOL hasBeenOrdered;
+@property (nonatomic) BOOL isEditable;
 
 @end

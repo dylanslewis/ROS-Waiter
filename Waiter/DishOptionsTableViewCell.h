@@ -13,8 +13,9 @@
 @property (weak, nonatomic) IBOutlet UILabel *optionNameLabel;
 @property (weak, nonatomic) IBOutlet UILabel *optionPriceLabel;
 @property (weak, nonatomic) IBOutlet UILabel *dishOptionQuantityLabel;
+@property (weak, nonatomic) IBOutlet UILabel *alreadySeenLabel;
 
-@property (nonatomic) BOOL hasBeenOrdered;
+@property (nonatomic) BOOL isEditable;
 
 @property (weak, nonatomic) IBOutlet UIButton *selectOptionButton;
 

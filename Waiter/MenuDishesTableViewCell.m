@@ -12,6 +12,8 @@
 
 - (void)awakeFromNib {
     // Initialization code
+    
+    _isEditable = NO;
 }
 
 - (void)setSelected:(BOOL)selected animated:(BOOL)animated {

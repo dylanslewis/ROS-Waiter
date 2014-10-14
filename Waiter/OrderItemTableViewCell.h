@@ -13,5 +13,6 @@
 @property (weak, nonatomic) IBOutlet UILabel *orderItemNameLabel;
 @property (weak, nonatomic) IBOutlet UILabel *orderItemPriceLabel;
 @property (weak, nonatomic) IBOutlet UILabel *orderItemStateLabel;
+@property (weak, nonatomic) IBOutlet UIView *stateView;
 
 @end

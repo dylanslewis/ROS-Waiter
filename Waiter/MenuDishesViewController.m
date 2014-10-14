@@ -15,9 +15,12 @@
 @interface MenuDishesViewController ()
 
 @property (strong, nonatomic) NSArray *orderItemArray;
-@property (strong, nonatomic) NSMutableArray *customisedOrderItems;
 
 @property (strong, nonatomic) MenuDishesTableViewCell *touchedCell;
+@property (strong, nonatomic) MenuDishesOptionsTableViewCell *touchedOptionCell;
+
+@property (strong, nonatomic) NSMutableDictionary *orderedItemsAndQuantities;
+@property (strong, nonatomic) NSMutableArray *nonAcceptedDishOrderItems;
 
 @property (strong, nonatomic) NSMutableArray *objects;
 
@@ -69,28 +72,35 @@
 - (IBAction)plusDishButtonTouched:(id)sender {
     // Get the cell that the button was touched on.
     _touchedCell = (MenuDishesTableViewCell *)[[sender superview] superview];
-    
-    PFObject *object = [_touchedCell dishObject];
-    
-    if ([[object[@"options"] allKeys] count]==0) {
-        // If the item has already been ordered, increment the quantity.
-        if (_touchedCell.hasBeenOrdered) {
-            PFObject *orderItem = [_touchedCell orderItemObject];
-            
-            orderItem[@"quantity"] = [NSNumber numberWithInt:[[orderItem valueForKey:@"quantity"] intValue] + 1];
-            
-            [orderItem saveInBackgroundWithBlock:^(BOOL succeeded, NSError *error) {
-                [self getParseData];
-            }];
-        } else {
-            // If the item hasn't been ordered yet, create a new orderItem object.
-            [self addOrderItemToOrderForDish:[_touchedCell dishObject]];
-        }
+
+    if (_touchedCell.isEditable) {
+        // This means the previously ordered item hasn't been accepted by the kitchen yet, so we can change its quantity.
         
-        [[NSNotificationCenter defaultCenter] postNotificationName:@"addedItemToOrder" object:nil];
+        PFObject *orderItem = [_touchedCell orderItemObject];
+        
+        orderItem[@"quantity"] = [NSNumber numberWithInt:[[orderItem valueForKey:@"quantity"] intValue] + 1];
+        
+        [orderItem saveInBackgroundWithBlock:^(BOOL succeeded, NSError *error) {
+            [self getParseData];
+            [[NSNotificationCenter defaultCenter] postNotificationName:@"addedItemToOrder" object:nil];
+        }];
     } else {
-        // The dish has various options, so we present them.
-        [self performSegueWithIdentifier:@"selectOptionSegue" sender:nil];
+        // The dish has either not been ordered yet or it has already been accepted by the kitchen, so we must make a new object.
+        
+        PFObject *dish = [_touchedCell dishObject];
+        
+        [dish fetchIfNeededInBackgroundWithBlock:^(PFObject *dishObject, NSError *error) {
+            // Check if the dish has options.
+            if ([[dishObject[@"options"] allKeys] count]==0) {
+                // If the item has already been ordered, increment the quantity.
+                
+                [self addOrderItemToOrderForDish:dishObject];
+            } else {
+                // The dish has various options, so present them.
+                
+                [self performSegueWithIdentifier:@"selectOptionSegue" sender:nil];
+            }
+        }];
     }
 }
 
@@ -98,30 +108,26 @@
     // Get the cell that was just touched.
     _touchedCell = (MenuDishesTableViewCell *)[[sender superview] superview];
     
-    // Safety check.
-    if (_touchedCell.hasBeenOrdered) {
+    if (_touchedCell.isEditable) {
+        // The cell is editable, so we can decrement the quantity.
+        
         PFObject *orderItem = [_touchedCell orderItemObject];
         
         // If the quantity is one, delete the object.
         if ([[orderItem valueForKey:@"quantity"] isEqual:@1]) {
             [orderItem deleteInBackgroundWithBlock:^(BOOL succeeded, NSError *error) {
                 [self getParseData];
+                [[NSNotificationCenter defaultCenter] postNotificationName:@"addedItemToOrder" object:nil];
             }];
-            
-            ////
-            // Delete any discounts associated with this item.
-            ////
-            
         } else {
             // Decrement the quantity.
             orderItem[@"quantity"] = [NSNumber numberWithInt:[[orderItem valueForKey:@"quantity"] intValue] - 1];
             
             [orderItem saveInBackgroundWithBlock:^(BOOL succeeded, NSError *error) {
                 [self getParseData];
+                [[NSNotificationCenter defaultCenter] postNotificationName:@"addedItemToOrder" object:nil];
             }];
         }
-        
-        [[NSNotificationCenter defaultCenter] postNotificationName:@"addedItemToOrder" object:nil];
     }
 }
 
@@ -129,45 +135,59 @@
     // This happens when the user touches the 'plus' of an option, as opposed to an Order Item. Increment the quantity.
     
     // Get the cell that the button was touched on.
-    _touchedCell = (MenuDishesTableViewCell *)[[sender superview] superview];
+    _touchedOptionCell = (MenuDishesOptionsTableViewCell *)[[sender superview] superview];
     
-    PFObject *orderItem = [_touchedCell orderItemObject];
+    PFObject *orderItem = [_touchedOptionCell orderItemObject];
     
-    orderItem[@"quantity"] = [NSNumber numberWithInt:[[orderItem valueForKey:@"quantity"] intValue] + 1];
-    
-    [orderItem saveInBackgroundWithBlock:^(BOOL succeeded, NSError *error) {
-        [self getParseData];
-    }];
-    
-    [[NSNotificationCenter defaultCenter] postNotificationName:@"addedItemToOrder" object:nil];
+    if (_touchedOptionCell.isEditable) {
+        // This means the previously ordered item hasn't been accepted by the kitchen yet, so we can change its quantity.
+        
+        orderItem[@"quantity"] = [NSNumber numberWithInt:[[orderItem valueForKey:@"quantity"] intValue] + 1];
+        
+        [orderItem saveInBackgroundWithBlock:^(BOOL succeeded, NSError *error) {
+            [self getParseData];
+            [[NSNotificationCenter defaultCenter] postNotificationName:@"addedItemToOrder" object:nil];
+        }];
+    } else {
+        // The optioned dish has already been accepted, so we must make a new object.
+        
+        PFObject *dish = orderItem[@"whichDish"];
+        
+        [dish fetchIfNeededInBackgroundWithBlock:^(PFObject *dishObject, NSError *error) {
+            [self addOrderItemToOrderWithDish:dishObject withOption:orderItem[@"option"]];
+        }];
+
+    }
 }
 
 - (IBAction)optionMinusButtonTouched:(id)sender {
     // If the user sets the quantity to zero for this option, delete it from the order.
-    _touchedCell = (MenuDishesTableViewCell *)[[sender superview] superview];
+    _touchedOptionCell = (MenuDishesOptionsTableViewCell *)[[sender superview] superview];
     
-    // Safety check.
-    PFObject *orderItem = [_touchedCell orderItemObject];
-    
-    // If the quantity is one, delete the object.
-    if ([[orderItem valueForKey:@"quantity"] isEqual:@1]) {
-        [orderItem deleteInBackgroundWithBlock:^(BOOL succeeded, NSError *error) {
-            [self getParseData];
-        }];
+    if (_touchedOptionCell.isEditable) {
+        // The cell is editable, so we can decrement the quantity.
         
-        // Delete any discounts associated with this item.
-
-    } else {
-        // Decrement the quantity.
-        orderItem[@"quantity"] = [NSNumber numberWithInt:[[orderItem valueForKey:@"quantity"] intValue] - 1];
+        PFObject *orderItem = [_touchedOptionCell orderItemObject];
         
-        [orderItem saveInBackgroundWithBlock:^(BOOL succeeded, NSError *error) {
-            [self getParseData];
-        }];
+        // Safety check that this item can be edited.
+        if ([orderItem[@"state"] isEqualToString:@"new"] || [orderItem[@"state"] isEqualToString:@"delivered"]) {
+            // If the quantity is one, delete the object.
+            if ([[orderItem valueForKey:@"quantity"] isEqual:@1]) {
+                [orderItem deleteInBackgroundWithBlock:^(BOOL succeeded, NSError *error) {
+                    [self getParseData];
+                    [[NSNotificationCenter defaultCenter] postNotificationName:@"addedItemToOrder" object:nil];
+                }];
+            } else {
+                // Decrement the quantity.
+                orderItem[@"quantity"] = [NSNumber numberWithInt:[[orderItem valueForKey:@"quantity"] intValue] - 1];
+                
+                [orderItem saveInBackgroundWithBlock:^(BOOL succeeded, NSError *error) {
+                    [self getParseData];
+                    [[NSNotificationCenter defaultCenter] postNotificationName:@"addedItemToOrder" object:nil];
+                }];
+            }
+        }
     }
-    
-    // Update View Order UI.
-    [[NSNotificationCenter defaultCenter] postNotificationName:@"addedItemToOrder" object:nil];
 }
 
 
@@ -201,6 +221,33 @@
     }];
 }
 
+- (void)addOrderItemToOrderWithDish:(PFObject *)dish withOption:(NSDictionary *)option {
+    // The Option hasn't been ordered before, so create the object.
+    PFObject *orderItem = [PFObject objectWithClassName:@"OrderItem"];
+    orderItem[@"quantity"]=@1;
+    
+    // Relate this dish order to the dish and order objects.
+    orderItem[@"whichDish"] = dish;
+    orderItem[@"name"] = [dish valueForKey:@"name"];
+    orderItem[@"type"] = [dish valueForKey:@"type"];
+    orderItem[@"forOrder"] = _currentOrder;
+    orderItem[@"option"] = option;
+    orderItem[@"price"] = [[option allValues] firstObject];
+    orderItem[@"state"] = @"new";
+    orderItem[@"tableNumber"] = _currentOrder[@"tableNumber"];
+    
+    orderItem[@"course"] = [_currentCourse valueForKey:@"name"];
+    
+    // Add ACL permissions for added security.
+    PFACL *acl = [PFACL ACLWithUser:[PFUser currentUser]];
+    [orderItem setACL:acl];
+    
+    [orderItem saveInBackgroundWithBlock:^(BOOL succeeded, NSError *error) {
+        // Tell the View Order scene to reload its data.
+        [[NSNotificationCenter defaultCenter] postNotificationName:@"addedItemToOrder" object:nil];
+    }];
+}
+
 // Override to customize what kind of query to perform on the class. The default is to query for
 // all objects ordered by createdAt descending.
 - (void)getParseData {
@@ -216,17 +263,16 @@
     [query orderByAscending:@"name"];
     
     [query findObjectsInBackgroundWithBlock:^(NSArray *orderItems, NSError *error) {
-        // Get the already ordered items for this course.
-        [self getOrderItems];
-        
         // Store the retrieved objects locally.
         _objects = [[NSMutableArray alloc] initWithArray:orderItems];
+        
+        // Get the already ordered items for this course.
+        [self getOrderItems];
     }];
 }
 
 - (void)getOrderItems {
     _orderItemArray = nil;
-    _customisedOrderItems = nil;
     
     PFQuery *getOrderItems = [PFQuery queryWithClassName:@"OrderItem"];
     [getOrderItems whereKey:@"forOrder" equalTo:_currentOrder];
@@ -236,17 +282,35 @@
         if (!error) {
             // Create an array of all order items for this course.
             _orderItemArray = [[NSArray alloc] initWithArray:orderItems];
-            
-            _customisedOrderItems = [[NSMutableArray alloc] init];
+            _orderedItemsAndQuantities = [[NSMutableDictionary alloc] init];
+            _nonAcceptedDishOrderItems = [[NSMutableArray alloc] init];
             
             #warning slight bug where it adds two entries of customised objects after updating quantity.
             
-            // Store all customised items in a separate array.
+            // Go through each ordered item object.
             for (PFObject *orderItem in _orderItemArray) {
-                // If the order item is customised...
-                if ([[orderItem valueForKey:@"option"] count] > 0) {
-                    [_customisedOrderItems addObject:orderItem];
+                // Check if this is a non-accepted (i.e. editable) order item.
+                if ([orderItem[@"state"] isEqualToString:@"new"] || [orderItem[@"state"] isEqualToString:@"delivered"]) {
+                    [_nonAcceptedDishOrderItems addObject:orderItem];
+                }
+                
+                NSString *fullItemName = [self fullDishNameWithOptionForOrderItem:orderItem];
+                
+                // Calculate the total quantity of each ordered item.
+                if ([[_orderedItemsAndQuantities allKeys] containsObject:fullItemName]) {
+                    // This means more than one order item exists for this combination of option and dish name.
                     
+                    NSInteger currentQuantity = [[_orderedItemsAndQuantities valueForKey:fullItemName] integerValue];
+                    NSInteger newQuantity = currentQuantity + [orderItem[@"quantity"] integerValue];
+                    NSNumber *quantity = [[NSNumber alloc] initWithInteger:newQuantity];
+                    
+                    [_orderedItemsAndQuantities removeObjectForKey:fullItemName];
+                    [_orderedItemsAndQuantities setObject:quantity forKey:fullItemName];
+                } else {
+                    // This is the first occurence of this option and dish name, so add the quantity to the dictionary..
+                    [_orderedItemsAndQuantities setObject:orderItem[@"quantity"] forKey:fullItemName];
+                    
+                    // Insert this orderItem object into the _objects array, right after its parent Dish object.
                     NSInteger currentIndex = 0;
                     
                     // Go through each of the dish objects for this course.
@@ -257,6 +321,11 @@
                         if ([dish[@"name"] isEqualToString:orderItem[@"name"]]) {
                             // Add the customised order item into the array, at the parent dish object position + 1
                             [_objects insertObject:orderItem atIndex:currentIndex];
+                            
+                            // If the dish has no options, given that we know it has been ordered, replace it in the array with the order item object.
+                            if ([[dish[@"options"] allKeys] count]==0) {
+                                [_objects removeObject:dish];
+                            }
                             
                             break;
                         }
@@ -276,76 +345,143 @@
     static NSString *CellIdentifier = @"dishCell";
     static NSString *OptionCellIdentifier = @"dishOptionCell";
     
-    // There are three posibilities for cells in this table:
-    // - Dish object: an item on the menu that hasn't been ordered, shown in green.
-    // - Order Item object: an item on the menu that HAS been ordered, shown in blue
-    // - Order Item Option: an option of a Dish that has been ordered, also shown in blue.
+    // There are four possibilities for cells in this table:
+    // - ORDER ITEM with OPTIONS: a dish with options has been ordered, and this cell represents the ordered option. (blue, indented text)
+    // - ORDER ITEM without OPTIONS: a plain dish that has no options has been ordered. (blue, unindented text).
+    // - DISH with OPTIONS: a dish that has not been ordered (green, unindented text).
+    // - DISH without OPTIONS: a dish that has not been ordered that will display options upon ordering.
     
     // Get the object from the array.
     PFObject *currentObject = [_objects objectAtIndex:[indexPath row]];
     
-    // Check if this is a dish object or an order item object.
-    if (currentObject[@"quantity"] > 0) {
-        // This is a pure option cell, that shows no dish name, just the option name (indented).
-        MenuDishesOptionsTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:OptionCellIdentifier];
+    // Check if this is a Dish object or an Order Item object (only Order Item objects will have an estimatedCompletionTime).
+    if ([[currentObject allKeys] containsObject:@"tableNumber"]) {
+        // ORDER ITEM CELL
         
-        // Update the dish name label.
-        NSMutableAttributedString *dishString = [[NSMutableAttributedString alloc] initWithString:[[currentObject[@"option"] allKeys] firstObject]];
-        [dishString addAttribute:NSFontAttributeName value:[UIFont fontWithName:@"HelveticaNeue-Light" size:18.0f] range:NSMakeRange(0, [dishString length])];
+        // Work out whether the Order Item is editable or not.
+        BOOL isEditable = NO;
+        NSInteger editableQuantity = 0;
+        NSInteger alreadySeenQuantity = 0;
+        NSInteger totalQuantityForDish = 0;
         
-        // Set the cell's values.
-        cell.dishOptionNameLabel.attributedText = dishString;
-        cell.priceLabel.text = [NSString stringWithFormat:@"£%@", [currentObject[@"option"] valueForKey:cell.dishOptionNameLabel.text]];
-        cell.quantityLabel.text = [NSString stringWithFormat:@"%@ x", currentObject[@"quantity"]];
+        // Use the concatenated dish name to get the total quantity (total ordered, new + accepted) of this dish option.
+        NSString *fullDishName = [self fullDishNameWithOptionForOrderItem:currentObject];
+        totalQuantityForDish = [[_orderedItemsAndQuantities valueForKey:fullDishName] integerValue];
         
-        cell.orderItemObject = currentObject;
-        
-        return cell;
-    } else {
-        // This is a dish cell.
-        MenuDishesTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
-        
-        [cell.minusDishButton setEnabled:NO];
-        
-        // Store the object.
-        cell.dishObject = [_objects objectAtIndex:indexPath.row];
-        
-        NSMutableAttributedString *dishString = [[NSMutableAttributedString alloc] initWithString:[cell.dishObject valueForKey:@"name"]];
-        [dishString addAttribute:NSFontAttributeName value:[UIFont fontWithName:@"HelveticaNeue" size:18.0f] range:NSMakeRange(0, [dishString length])];
-        
-        // Check to see if this dish, or its options, have been ordered.
-        for (PFObject *orderItem in _orderItemArray) {
-            if ([orderItem[@"name"] isEqualToString:[dishString string]]) {
-                [dishString addAttribute:NSForegroundColorAttributeName value:[UIColor kitchenBlueColour] range:NSMakeRange(0, [dishString length])];
+        // See if there is a current order item (i.e. editable) for this dish.
+        for (PFObject *orderItem in _nonAcceptedDishOrderItems) {
+            NSString *fullDishNameForOrderItem = [self fullDishNameWithOptionForOrderItem:orderItem];
+            
+            if ([fullDishNameForOrderItem isEqualToString:fullDishName]) {
+                // This means the current quantity can be edited.
+                isEditable = YES;
+                
+                // Store the quantity of dishes that are editable (haven't been accepted by the kitchen).
+                editableQuantity = [orderItem[@"quantity"] integerValue];
+                
+                // Set the order item object attatched to this cell be the one which can be edited.
+                currentObject = orderItem;
+                
+                break;
             }
         }
         
-        // Configure the cell
+        // Calculate the number of dishes that the kitchen has already seen.
+        alreadySeenQuantity = totalQuantityForDish  - editableQuantity;
+        
+        // Work out if this is a pure Dish Order Item or an Optioned Dish Order Item.
+        if (currentObject[@"option"]) {
+            // ORDER ITEM CELL with OPTIONS
+            
+            MenuDishesOptionsTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:OptionCellIdentifier];
+            
+            // Update the dish name label.
+            NSMutableAttributedString *dishString = [[NSMutableAttributedString alloc] initWithString:[[currentObject[@"option"] allKeys] firstObject]];
+            [dishString addAttribute:NSFontAttributeName value:[UIFont fontWithName:@"HelveticaNeue-Light" size:18.0f] range:NSMakeRange(0, [dishString length])];
+            
+            // Set basic variables.
+            cell.dishNameLabel.attributedText = dishString;
+            cell.priceLabel.text = [NSString stringWithFormat:@"£%@", [currentObject[@"option"] valueForKey:cell.dishNameLabel.text]];
+            cell.orderItemObject = currentObject;
+            cell.isEditable = isEditable;
+            
+            // Hide the already seen label if no dishes have been accepted yet.
+            if (alreadySeenQuantity==0) {
+                [cell.alreadySeenLabel setHidden:YES];
+            }
+            
+            // Display labels depending on whether or not the dish is editable.
+            if (isEditable) {
+                [cell.quantityLabel setHidden:NO];
+                [cell.minusButton setEnabled:YES];
+                cell.quantityLabel.text = [NSString stringWithFormat:@"%ld x", (long)editableQuantity];
+                cell.alreadySeenLabel.text = [NSString stringWithFormat:@"+ %ld already accepted (%ld total)", alreadySeenQuantity, totalQuantityForDish];
+            } else {
+                [cell.quantityLabel setHidden:YES];
+                [cell.minusButton setEnabled:NO];
+                cell.alreadySeenLabel.text = [NSString stringWithFormat:@"%ld already accepted", totalQuantityForDish];
+            }
+            
+            return cell;
+        } else {
+            // ORDER ITEM CELL without OPTIONS
+            
+            MenuDishesTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
+            
+            NSMutableAttributedString *dishString = [[NSMutableAttributedString alloc] initWithString:currentObject[@"name"]];
+            [dishString addAttribute:NSFontAttributeName value:[UIFont fontWithName:@"HelveticaNeue" size:18.0f] range:NSMakeRange(0, [dishString length])];
+            [dishString addAttribute:NSForegroundColorAttributeName value:[UIColor kitchenBlueColour] range:NSMakeRange(0, [dishString length])];
+            
+            // Set basic variables.
+            cell.dishNameLabel.attributedText = dishString;
+            cell.dishPriceLabel.text = [NSString stringWithFormat:@"£%@", currentObject[@"price"]];
+            cell.dishObject = currentObject[@"whichDish"];
+            cell.orderItemObject = currentObject;
+            cell.isEditable = isEditable;
+            [cell.fromLabel setHidden:YES];
+            
+            // Hide the already seen label if no dishes have been accepted yet.
+            if (alreadySeenQuantity==0) {
+                [cell.alreadySeenLabel setHidden:YES];
+            }
+                        
+            // Display labels and buttons depending on whether or not the dish is editable.
+            if (isEditable) {
+                [cell.dishQuantityLabel setHidden:NO];
+                cell.dishQuantityLabel.text = [NSString stringWithFormat:@"%ld x", (long)editableQuantity];
+                cell.alreadySeenLabel.text = [NSString stringWithFormat:@"+ %ld already accepted (%ld total)", alreadySeenQuantity, totalQuantityForDish];
+            } else {
+                [cell.dishQuantityLabel setHidden:YES];
+                [cell.minusDishButton setEnabled:NO];
+                cell.alreadySeenLabel.text = [NSString stringWithFormat:@"%ld already accepted", totalQuantityForDish];
+            }
+
+            return cell;
+        }
+    } else {
+        // DISH CELL
+        
+        MenuDishesTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
+        
+        NSMutableAttributedString *dishString = [[NSMutableAttributedString alloc] initWithString:currentObject[@"name"]];
+        [dishString addAttribute:NSFontAttributeName value:[UIFont fontWithName:@"HelveticaNeue" size:18.0f] range:NSMakeRange(0, [dishString length])];
+        
+        // Set basic variables.
         cell.dishNameLabel.attributedText = dishString;
-        cell.dishQuantityLabel.text = @"";
+        cell.dishObject = currentObject;
+        cell.isEditable = NO;
+        [cell.dishQuantityLabel setHidden:YES];
+        [cell.alreadySeenLabel setHidden:YES];
+        [cell.minusDishButton setEnabled:NO];
         
         // Check if the Dish has options.
         if ([[cell.dishObject[@"options"] allKeys] count]==0) {
-            // This dish cell doesn't have options.
+            // DISH CELL without OPTIONS
+            
             cell.dishPriceLabel.text = [NSString stringWithFormat:@"£%@", [cell.dishObject valueForKey:@"price"]];
             [cell.fromLabel setHidden:YES];
-            
-            // Look to see if an Order Item object appears for this dish.
-            for (PFObject *orderItem in _orderItemArray) {
-                if ([[orderItem valueForKey:@"name"] isEqual:[cell.dishObject valueForKey:@"name"]]) {
-                    // This means the item has been ordered, so we need to update the corresponding labels.
-                    cell.dishQuantityLabel.text = [NSString stringWithFormat:@"%@ x", [orderItem valueForKey:@"quantity"]];
-                    
-                    cell.orderItemObject = orderItem;
-                    cell.hasBeenOrdered = YES;
-                    [cell.minusDishButton setEnabled:YES];
-                    
-                    break;
-                }
-            }
         } else {
-            // This dish has options.
-            [cell.fromLabel setHidden:NO];
+            // This DISH CELL with OPTIONS
             
             NSDictionary *options = [[NSDictionary alloc] initWithDictionary:cell.dishObject[@"options"]];
             
@@ -377,6 +513,18 @@
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
     return [_objects count];
+}
+
+#pragma mark - Other
+
+- (NSString *)fullDishNameWithOptionForOrderItem:(PFObject *)orderItem {
+    // If the order item is customised, concatenate the option name with the dish name.
+    if ([[orderItem valueForKey:@"option"] count] > 0) {
+        NSString *optionName = [[orderItem[@"option"] allKeys] firstObject];
+        return [NSString stringWithFormat:@"%@ %@", optionName, orderItem[@"name"]];
+    } else {
+        return orderItem[@"name"];
+    }
 }
 
 
