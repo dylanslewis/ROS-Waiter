@@ -78,6 +78,11 @@
         if (succeeded) {
             [[NSNotificationCenter defaultCenter] postNotificationName:@"orderChange" object:nil];
             
+            PFInstallation *currentInstallation = [PFInstallation currentInstallation];
+            NSString *tableNumberString = [NSString stringWithFormat:@"table%@", _currentOrder[@"tableNumber"]];
+            [currentInstallation removeObject:tableNumberString forKey:@"channels"];
+            [currentInstallation saveInBackground];
+            
             [self.navigationController popViewControllerAnimated:TRUE];
         }
     }];
@@ -140,6 +145,12 @@
     _currentOrder[@"state"] = @"paid";
     [_currentOrder saveInBackgroundWithBlock:^(BOOL succeeded, NSError *error) {
         [[NSNotificationCenter defaultCenter] postNotificationName:@"orderChange" object:nil];
+        
+        PFInstallation *currentInstallation = [PFInstallation currentInstallation];
+        NSString *tableNumberString = [NSString stringWithFormat:@"table%@", _currentOrder[@"tableNumber"]];
+        [currentInstallation removeObject:tableNumberString forKey:@"channels"];
+        [currentInstallation saveInBackground];
+        
         [self dismissViewControllerAnimated:YES completion:NULL];
         [self.navigationController popViewControllerAnimated:TRUE];
     }];
@@ -155,6 +166,9 @@
     
     [getOrderItems findObjectsInBackgroundWithBlock:^(NSArray *orderItems, NSError *error) {
         if (!error) {
+            // Update the order state.
+            [self setOrderStateForOrder:_currentOrder];
+            
             // Create an array of all order items.
             _orderItemsArray = [[NSArray alloc] initWithArray:orderItems];
             _orderItemSections = [[NSMutableDictionary alloc] init];
@@ -207,6 +221,55 @@
         
         // Reload the table.
         [orderItemsTableView reloadData];
+    }];
+}
+
+- (void)setOrderStateForOrder:(PFObject *)order {
+    // Get all the items belonging to this order.
+    PFQuery *getOrderItems = [PFQuery queryWithClassName:@"OrderItem"];
+    [getOrderItems whereKey:@"forOrder" equalTo:order];
+    [getOrderItems findObjectsInBackgroundWithBlock:^(NSArray *orderItems, NSError *error) {
+        if (!error) {
+            NSInteger noOfItems=0;
+            NSInteger noOfCollectedItems=0;
+            NSInteger noOfAcceptedItems=0;
+            NSInteger noOfRejectedItems=0;
+            NSInteger noOfReadyItems=0;
+            
+            // Go through each of the order items and update the count variables.
+            for (PFObject *orderItem in orderItems) {
+                noOfItems++;
+                if ([orderItem[@"state"] isEqualToString:@"collected"]) {
+                    noOfCollectedItems++;
+                } else if ([orderItem[@"state"] isEqualToString:@"accepted"]) {
+                    noOfAcceptedItems++;
+                } else if ([orderItem[@"state"] isEqualToString:@"rejected"]) {
+                    noOfRejectedItems++;
+                } else if ([orderItem[@"state"] isEqualToString:@"ready"]) {
+                    noOfReadyItems++;
+                }
+            }
+            
+            NSString *state;
+            
+            // Go through each of the variables, and try and assign the most dominant item state to the whole order.
+            if (noOfReadyItems>0) {
+                state = @"readyToCollect";
+            } else if (noOfRejectedItems>0) {
+                state = @"itemRejected";
+            } else if (noOfAcceptedItems>0) {
+                state = @"estimatesSet";
+            } else if (noOfCollectedItems>0) {
+                state = @"itemsCollected";
+            } else if (noOfItems>0) {
+                state = @"itemsOrdered";
+            } else {
+                state = @"new";
+            }
+            
+            order[@"state"] = state;
+            [order saveInBackground];
+        }
     }];
 }
 
@@ -324,8 +387,10 @@
 
     OrderItemTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
     
+    NSMutableAttributedString *dishAttributedString, *quantityAttributedString, *priceAttributedString, *stateAttributedString;
+    
     if ([[orderItem[@"option"] allKeys] count]>0) {
-        // This means the order item has options.
+        // Item has option.
         
         // Extract the option name.
         NSDictionary *optionKeyValuePair = [[NSDictionary alloc] initWithDictionary:orderItem[@"option"]];
@@ -334,35 +399,33 @@
         NSString *concatenatedString = [NSString stringWithFormat:@"%@ %@", [[optionKeyValuePair allKeys] firstObject], [orderItem valueForKey:@"name"]];
         
         // Set basic attributations.
-        NSMutableAttributedString *dishNameWithOption = [[NSMutableAttributedString alloc] initWithString:concatenatedString];
+        dishAttributedString = [[NSMutableAttributedString alloc] initWithString:concatenatedString];
         
         #warning Font attribute not working
-        [dishNameWithOption addAttribute:NSFontAttributeName value:[UIFont fontWithName:@"HelveticaNeue-Light" size:20.0f] range:NSMakeRange(0, [dishNameWithOption length])];
+        [dishAttributedString addAttribute:NSFontAttributeName value:[UIFont fontWithName:@"HelveticaNeue-Light" size:20.0f] range:NSMakeRange(0, [dishAttributedString length])];
         
         // Set the option name to blue.
-        [dishNameWithOption addAttribute:NSForegroundColorAttributeName value:[UIColor kitchenBlueColour] range:NSMakeRange(0, [[[optionKeyValuePair allKeys] firstObject] length])];
-        
-        cell.orderItemNameLabel.attributedText = dishNameWithOption;
-        
+        [dishAttributedString addAttribute:NSForegroundColorAttributeName value:[UIColor kitchenBlueColour] range:NSMakeRange(0, [[[optionKeyValuePair allKeys] firstObject] length])];
     } else {
-        // The order item has no options.
+        // Item does not have options.
         
         // Store the dish name in an attribtued string.
-        NSMutableAttributedString *dishName = [[NSMutableAttributedString alloc] initWithString:[orderItem valueForKey:@"name"]];
-        [dishName addAttribute:NSFontAttributeName value:[UIFont fontWithName:@"HelveticaNeue-Light" size:20.0f] range:NSMakeRange(0, [dishName length])];
-        
-        cell.orderItemNameLabel.attributedText = dishName;
+        dishAttributedString = [[NSMutableAttributedString alloc] initWithString:[orderItem valueForKey:@"name"]];
+        [dishAttributedString addAttribute:NSFontAttributeName value:[UIFont fontWithName:@"HelveticaNeue-Light" size:20.0f] range:NSMakeRange(0, [dishAttributedString length])];
     }
-
+    
+    [cell.orderItemNameLabel setAttributedText:dishAttributedString];
+    
+    // Set the text for the price and quantity strings.
+    priceAttributedString = [[NSMutableAttributedString alloc] initWithString:[NSString stringWithFormat:@"£%@", [orderItem objectForKey:@"price"]]];
+    quantityAttributedString = [[NSMutableAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@ x", [orderItem objectForKey:@"quantity"]]];
     
     if ([orderItem[@"state"] isEqualToString:@"delivered"]) {
         // Set basic attributations.
-        NSMutableAttributedString *state = [[NSMutableAttributedString alloc] initWithString:@"delivered"];
-        [state addAttribute:NSFontAttributeName value:[UIFont fontWithName:@"HelveticaNeue-Light" size:12] range:NSMakeRange(0, [state length])];
-        [state addAttribute:NSForegroundColorAttributeName value:[UIColor kitchenBlueColour] range:NSMakeRange(0, [state length])];
+        stateAttributedString = [[NSMutableAttributedString alloc] initWithString:@"delivered"];
+        [stateAttributedString addAttribute:NSForegroundColorAttributeName value:[UIColor kitchenBlueColour] range:NSMakeRange(0, [stateAttributedString length])];
         
         [cell.stateView setBackgroundColor:[UIColor kitchenBlueColour]];
-        cell.orderItemStateLabel.attributedText = state;
     } else if ([orderItem[@"state"] isEqualToString:@"accepted"]) {
         // Work out the time until completion.
         NSDate *currentDate = [NSDate date];
@@ -372,46 +435,48 @@
         int numberOfMinutes = secondsBetween / 60;
         
         // Set basic attributations.
-        NSMutableAttributedString *state = [[NSMutableAttributedString alloc] initWithString:[NSString stringWithFormat:@"%d mins", numberOfMinutes]];
-        [state addAttribute:NSFontAttributeName value:[UIFont fontWithName:@"HelveticaNeue-Light" size:12] range:NSMakeRange(0, [state length])];
-        [state addAttribute:NSForegroundColorAttributeName value:[UIColor waiterGreenColour] range:NSMakeRange(0, [state length])];
+        stateAttributedString = [[NSMutableAttributedString alloc] initWithString:[NSString stringWithFormat:@"%d mins", numberOfMinutes]];
+        [stateAttributedString addAttribute:NSForegroundColorAttributeName value:[UIColor waiterGreenColour] range:NSMakeRange(0, [stateAttributedString length])];
         
         [cell.stateView setBackgroundColor:[UIColor waiterGreenColour]];
-        cell.orderItemStateLabel.attributedText = state;
     } else if ([orderItem[@"state"] isEqualToString:@"rejected"]) {
         // Set basic attributations.
-        NSMutableAttributedString *state = [[NSMutableAttributedString alloc] initWithString:@"rejected"];
-        [state addAttribute:NSFontAttributeName value:[UIFont fontWithName:@"HelveticaNeue-Light" size:12] range:NSMakeRange(0, [state length])];
-        [state addAttribute:NSForegroundColorAttributeName value:[UIColor managerRedColour] range:NSMakeRange(0, [state length])];
+        stateAttributedString = [[NSMutableAttributedString alloc] initWithString:@"rejected"];
+        [stateAttributedString addAttribute:NSForegroundColorAttributeName value:[UIColor managerRedColour] range:NSMakeRange(0, [stateAttributedString length])];
         
         [cell.stateView setBackgroundColor:[UIColor managerRedColour]];
-        cell.orderItemStateLabel.attributedText = state;
     } else if ([orderItem[@"state"] isEqualToString:@"ready"]) {
         // Set basic attributations.
-        NSMutableAttributedString *state = [[NSMutableAttributedString alloc] initWithString:@"ready"];
-        [state addAttribute:NSFontAttributeName value:[UIFont fontWithName:@"HelveticaNeue-Light" size:12] range:NSMakeRange(0, [state length])];
-        [state addAttribute:NSForegroundColorAttributeName value:[UIColor waiterGreenColour] range:NSMakeRange(0, [state length])];
+        stateAttributedString = [[NSMutableAttributedString alloc] initWithString:@"ready"];
+        [stateAttributedString addAttribute:NSForegroundColorAttributeName value:[UIColor waiterGreenColour] range:NSMakeRange(0, [stateAttributedString length])];
         
         [cell.stateView setBackgroundColor:[UIColor waiterGreenColour]];
-        cell.orderItemStateLabel.attributedText = state;
     } else if ([orderItem[@"state"] isEqualToString:@"collected"]) {
         // Set basic attributations.
-        NSMutableAttributedString *state = [[NSMutableAttributedString alloc] initWithString:@"collected"];
-        [state addAttribute:NSFontAttributeName value:[UIFont fontWithName:@"HelveticaNeue-Light" size:12] range:NSMakeRange(0, [state length])];
-        [state addAttribute:NSForegroundColorAttributeName value:[UIColor lightGrayColor] range:NSMakeRange(0, [state length])];
+        stateAttributedString = [[NSMutableAttributedString alloc] initWithString:@"collected"];
+        [stateAttributedString addAttribute:NSForegroundColorAttributeName value:[UIColor lightGrayColor] range:NSMakeRange(0, [stateAttributedString length])];
+        
+        // Set everything in the cell to grey.
+        [dishAttributedString addAttribute:NSForegroundColorAttributeName value:[UIColor lightGrayColor] range:NSMakeRange(0, [dishAttributedString length])];
+        [quantityAttributedString addAttribute:NSForegroundColorAttributeName value:[UIColor lightGrayColor] range:NSMakeRange(0, [quantityAttributedString length])];
+        [priceAttributedString addAttribute:NSForegroundColorAttributeName value:[UIColor lightGrayColor] range:NSMakeRange(0, [priceAttributedString length])];
         
         [cell.stateView setBackgroundColor:[UIColor lightGrayColor]];
-        cell.orderItemStateLabel.attributedText = state;
     } else {
         [cell.stateView setHidden:YES];
         [cell.orderItemStateLabel setHidden:YES];
     }
     
+    // Set the fonts and sizes of labels.
+    [stateAttributedString addAttribute:NSFontAttributeName value:[UIFont fontWithName:@"HelveticaNeue-Light" size:12] range:NSMakeRange(0, [stateAttributedString length])];
+    [quantityAttributedString addAttribute:NSFontAttributeName value:[UIFont fontWithName:@"HelveticaNeue-Light" size:18] range:NSMakeRange(0, [quantityAttributedString length])];
+    [priceAttributedString addAttribute:NSFontAttributeName value:[UIFont fontWithName:@"HelveticaNeue-Light" size:14] range:NSMakeRange(0, [priceAttributedString length])];
     
-    
-    
-    cell.orderItemPriceLabel.text = [NSString stringWithFormat:@"£%@", [orderItem objectForKey:@"price"]];
-    cell.orderItemQuantityLabel.text = [NSString stringWithFormat:@"%@ x", [orderItem objectForKey:@"quantity"]];
+    // Apply the attributed strings to the labels.
+    [cell.orderItemNameLabel setAttributedText:dishAttributedString];
+    [cell.orderItemQuantityLabel setAttributedText:quantityAttributedString];
+    [cell.orderItemPriceLabel setAttributedText:priceAttributedString];
+    [cell.orderItemStateLabel setAttributedText:stateAttributedString];
     
     return cell;
 }

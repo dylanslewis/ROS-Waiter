@@ -8,7 +8,9 @@
 
 #import <Parse/Parse.h>
 
-@interface MenuDishesViewController : UITableViewController
+@interface MenuDishesViewController : UIViewController <UITableViewDataSource, UITableViewDelegate> {
+    __weak IBOutlet UITableView *dishesTableView;
+}
 
 @property (strong, nonatomic) PFObject *currentCourse;
 @property (strong, nonatomic) PFObject *currentOrder;

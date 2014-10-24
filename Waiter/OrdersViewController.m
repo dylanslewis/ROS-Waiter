@@ -94,9 +94,34 @@
         if ([_ordersArray count]) {
             [ordersCollectionView setHidden:NO];
             [ordersCollectionView reloadData];
+            
+            // Subscribe to notifications for each of the orders.
+            PFInstallation *currentInstallation = [PFInstallation currentInstallation];
+            for (PFObject *order in orders) {
+                NSString *tableNumberString = [NSString stringWithFormat:@"table%@", order[@"tableNumber"]];
+                [currentInstallation addUniqueObject:tableNumberString forKey:@"channels"];
+            }
+            [currentInstallation saveInBackground];
+            
         } else {
             [ordersCollectionView setHidden:YES];
         }
+        
+        // Update the badge count to show the number of critical orders, i.e. orders that have dishes ready to collect or rejected.
+        NSInteger numberOfCriticalOrders = 0;
+        for (PFObject *order in orders) {
+            if ([order[@"state"] isEqualToString:@"readyToCollect"] || [order[@"state"] isEqualToString:@"itemRejected"]) {
+                numberOfCriticalOrders++;
+            }
+        }
+        if (numberOfCriticalOrders > 0) {
+            [[self navigationController] tabBarItem].badgeValue = [NSString stringWithFormat:@"%ld", (long)numberOfCriticalOrders];
+            [UIApplication sharedApplication].applicationIconBadgeNumber = numberOfCriticalOrders;
+        } else {
+            [[self navigationController] tabBarItem].badgeValue = nil;
+            [UIApplication sharedApplication].applicationIconBadgeNumber = 0;
+        }
+
     }];
 }
 
@@ -175,6 +200,12 @@
         // Refresh the table when the object is done saving.
         [self getParseData];
         
+        // Add this table to this device's Channels, so it can recieve Push notifications.
+        PFInstallation *currentInstallation = [PFInstallation currentInstallation];
+        NSString *tableNumberString = [NSString stringWithFormat:@"table%@", tableNumber];
+        [currentInstallation addUniqueObject:tableNumberString forKey:@"channels"];
+        [currentInstallation saveInBackground];
+        
         [self performSegueWithIdentifier:@"showOrderDetailsSegue" sender:order];
     }];
 }
@@ -192,7 +223,7 @@
         
     // Configure the cell
     cell.tableNumberLabel.text = [NSString stringWithFormat:@"%@", [order valueForKey:@"tableNumber"]];
-    cell.orderStateLabel.text = @"order state";
+    cell.orderStateLabel.text = order[@"state"];
     
     return cell;
 }

@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		FC35006E19F57DD400A71D8B /* Bolts.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FC35006B19F57DD300A71D8B /* Bolts.framework */; };
+		FC35006F19F57DD400A71D8B /* Parse.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FC35006C19F57DD300A71D8B /* Parse.framework */; };
+		FC35007019F57DD400A71D8B /* ParseFacebookUtils.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FC35006D19F57DD400A71D8B /* ParseFacebookUtils.framework */; };
 		FC5CA96B19CC4AD8000B9182 /* MenuCoursesViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FC5CA96A19CC4AD8000B9182 /* MenuCoursesViewController.m */; };
 		FC88DC0B19D57C41003363C6 /* DishOptionsTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = FC88DC0A19D57C41003363C6 /* DishOptionsTableViewCell.m */; };
 		FC88DC0E19D57C5F003363C6 /* DishOptionsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FC88DC0D19D57C5F003363C6 /* DishOptionsViewController.m */; };
@@ -38,9 +41,6 @@
 		FCD0E41119C053E500767B4A /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FCD0E3FC19C0538B00767B4A /* Security.framework */; };
 		FCD0E41219C053E500767B4A /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FCD0E3FA19C0538700767B4A /* StoreKit.framework */; };
 		FCD0E41319C053E500767B4A /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FCD0E3F819C0537F00767B4A /* SystemConfiguration.framework */; };
-		FCD0E41419C053E500767B4A /* Bolts.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FCD0E3F219C0535200767B4A /* Bolts.framework */; };
-		FCD0E41519C053E500767B4A /* Parse.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FCD0E3F319C0535200767B4A /* Parse.framework */; };
-		FCD0E41619C053E500767B4A /* ParseFacebookUtils.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FCD0E3F419C0535200767B4A /* ParseFacebookUtils.framework */; };
 		FCD0E41A19C0546D00767B4A /* LoginViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FCD0E41919C0546D00767B4A /* LoginViewController.m */; };
 		FCD0E41F19C05AD500767B4A /* SettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FCD0E41E19C05AD500767B4A /* SettingsViewController.m */; };
 		FCD0E42319C05B9400767B4A /* WaiterViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FCD0E42219C05B9400767B4A /* WaiterViewController.m */; };
@@ -57,6 +57,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		FC35006B19F57DD300A71D8B /* Bolts.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Bolts.framework; sourceTree = "<group>"; };
+		FC35006C19F57DD300A71D8B /* Parse.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Parse.framework; sourceTree = "<group>"; };
+		FC35006D19F57DD400A71D8B /* ParseFacebookUtils.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = ParseFacebookUtils.framework; sourceTree = "<group>"; };
 		FC5CA96919CC4AD8000B9182 /* MenuCoursesViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MenuCoursesViewController.h; sourceTree = "<group>"; };
 		FC5CA96A19CC4AD8000B9182 /* MenuCoursesViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MenuCoursesViewController.m; sourceTree = "<group>"; };
 		FC88DC0919D57C41003363C6 /* DishOptionsTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DishOptionsTableViewCell.h; sourceTree = "<group>"; };
@@ -135,9 +138,9 @@
 				FCD0E41119C053E500767B4A /* Security.framework in Frameworks */,
 				FCD0E41219C053E500767B4A /* StoreKit.framework in Frameworks */,
 				FCD0E41319C053E500767B4A /* SystemConfiguration.framework in Frameworks */,
-				FCD0E41419C053E500767B4A /* Bolts.framework in Frameworks */,
-				FCD0E41519C053E500767B4A /* Parse.framework in Frameworks */,
-				FCD0E41619C053E500767B4A /* ParseFacebookUtils.framework in Frameworks */,
+				FC35006E19F57DD400A71D8B /* Bolts.framework in Frameworks */,
+				FC35006F19F57DD400A71D8B /* Parse.framework in Frameworks */,
+				FC35007019F57DD400A71D8B /* ParseFacebookUtils.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -292,6 +295,9 @@
 		FCD0E40A19C053B600767B4A /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				FC35006B19F57DD300A71D8B /* Bolts.framework */,
+				FC35006C19F57DD300A71D8B /* Parse.framework */,
+				FC35006D19F57DD400A71D8B /* ParseFacebookUtils.framework */,
 				FCD0E40819C053B100767B4A /* AudioToolbox.framework */,
 				FCD0E40619C053AD00767B4A /* CFNetwork.framework */,
 				FCD0E40419C053A600767B4A /* CoreGraphics.framework */,
@@ -583,16 +589,17 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "Apple Development IOS Push Services: dylanslewis.ROS";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "Apple Development IOS Push Services: dylanslewis.ROS";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"/Users/dylan/Dropbox/Developer/Frameworks/parse-library-1",
+					"$(PROJECT_DIR)",
 				);
 				INFOPLIST_FILE = Waiter/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "";
+				PROVISIONING_PROFILE = "c025462a-d808-4d59-bd5a-77d41adfb1b8";
 				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
@@ -602,16 +609,17 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "Apple Development IOS Push Services: dylanslewis.ROS";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "Apple Development IOS Push Services: dylanslewis.ROS";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"/Users/dylan/Dropbox/Developer/Frameworks/parse-library-1",
+					"$(PROJECT_DIR)",
 				);
 				INFOPLIST_FILE = Waiter/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "";
+				PROVISIONING_PROFILE = "c025462a-d808-4d59-bd5a-77d41adfb1b8";
 				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;

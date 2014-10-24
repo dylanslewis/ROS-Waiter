@@ -9,6 +9,8 @@
 #import "AppDelegate.h"
 #import <Parse/Parse.h>
 #import "UIColor+ApplicationColours.h"
+#import "ViewOrderViewController.h"
+#import "OrdersViewController.h"
 
 @interface AppDelegate ()
 
@@ -21,6 +23,25 @@
     // Parse application credentials.
     [Parse setApplicationId:@"xmqa5fPQ9iIFnTdhj4KI9uxsbvOtqhcmTsLQNnnB"
                   clientKey:@"9o27OuesB5VcHx9RABHNGMpSSLQNTpewPf0uUEbb"];
+    
+    // Register for Push Notitications, if running iOS 8
+    if ([application respondsToSelector:@selector(registerUserNotificationSettings:)]) {
+        UIUserNotificationType userNotificationTypes = (UIUserNotificationTypeAlert |
+                                                        UIUserNotificationTypeBadge |
+                                                        UIUserNotificationTypeSound);
+        UIUserNotificationSettings *settings = [UIUserNotificationSettings settingsForTypes:userNotificationTypes
+                                                                                 categories:nil];
+        [application registerUserNotificationSettings:settings];
+        [application registerForRemoteNotifications];
+    } else {
+        // Register for Push Notifications before iOS 8
+        /*
+        [application registerForRemoteNotificationTypes:(UIRemoteNotificationTypeBadge |
+                                                         UIRemoteNotificationTypeAlert |
+                                                         UIRemoteNotificationTypeSound)];
+         */
+    }
+
     
     // Customise the navigation bar.
     [[UINavigationBar appearance] setBarTintColor:[UIColor waiterGreenColour]];
@@ -38,7 +59,66 @@
     [[UITabBarItem appearance] setTitleTextAttributes:[NSDictionary dictionaryWithObjectsAndKeys:
                                                        [UIFont fontWithName:@"HelveticaNeue-Light" size:11.0f], NSFontAttributeName,nil] forState:UIControlStateNormal];
     
+    
+    // Extract the notification data, so that users can be directed straight to the relevant order page.
+    NSDictionary *notificationPayload = launchOptions[UIApplicationLaunchOptionsRemoteNotificationKey];
+    
+    if (notificationPayload) {
+        // Create a pointer to the Order object
+        NSString *orderID = [notificationPayload objectForKey:@"oID"];
+        PFObject *targetOrder = [PFObject objectWithoutDataWithClassName:@"Order"
+                                                                objectId:orderID];
+        
+        NSLog(@"Just launched: %@", targetOrder);
+        
+        // Fetch order object
+        [targetOrder fetchIfNeededInBackgroundWithBlock:^(PFObject *orderObject, NSError *error) {
+            if ([PFUser currentUser] && !error) {
+                UIStoryboard *mainStoryboard = [UIStoryboard storyboardWithName:@"Main" bundle: nil];
+                ViewOrderViewController *orderViewController = (ViewOrderViewController *)[mainStoryboard instantiateViewControllerWithIdentifier: @"ViewOrder"];
+                [orderViewController setCurrentOrder:orderObject];
+            }
+        }];
+    }
+    
     return YES;
+}
+
+- (void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken {
+    // Store the deviceToken in the current installation and save it to Parse.
+    PFInstallation *currentInstallation = [PFInstallation currentInstallation];
+    currentInstallation[@"user"] = [PFUser currentUser];
+    [currentInstallation setDeviceTokenFromData:deviceToken];
+    currentInstallation.channels = @[];
+    [currentInstallation saveInBackground];
+}
+
+- (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo {
+    [PFPush handlePush:userInfo];
+}
+
+- (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo fetchCompletionHandler:(void (^)(UIBackgroundFetchResult))handler {
+    // Create empty order object
+    NSString *orderID = [userInfo objectForKey:@"oID"];
+    PFObject *targetOrder = [PFObject objectWithoutDataWithClassName:@"Order"
+                                                            objectId:orderID];
+    
+    // Fetch order object
+    [targetOrder fetchIfNeededInBackgroundWithBlock:^(PFObject *orderObject, NSError *error) {
+        // Show orders view controller
+        if (error) {
+            handler(UIBackgroundFetchResultFailed);
+        } else if ([PFUser currentUser]) {
+            UIStoryboard *mainStoryboard = [UIStoryboard storyboardWithName:@"Main" bundle: nil];
+            ViewOrderViewController *controller = (ViewOrderViewController *)[mainStoryboard instantiateViewControllerWithIdentifier: @"ViewOrder"];
+            [controller setCurrentOrder:orderObject];
+            [self.window.rootViewController presentViewController: controller animated:YES completion:nil];
+    
+            handler(UIBackgroundFetchResultNewData);
+        } else {
+            handler(UIBackgroundFetchResultNoData);
+        }
+    }];
 }
 
 - (void)applicationWillResignActive:(UIApplication *)application {
@@ -57,6 +137,13 @@
 
 - (void)applicationDidBecomeActive:(UIApplication *)application {
     // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
+    
+    // Reset the badge count whenever the app is opened.
+    PFInstallation *currentInstallation = [PFInstallation currentInstallation];
+    if (currentInstallation.badge != 0) {
+        currentInstallation.badge = 0;
+        [currentInstallation saveEventually];
+    }
 }
 
 - (void)applicationWillTerminate:(UIApplication *)application {

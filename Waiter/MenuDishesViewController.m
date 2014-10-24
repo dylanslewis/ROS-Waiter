@@ -16,13 +16,17 @@
 
 @property (strong, nonatomic) NSArray *orderItemArray;
 
-@property (strong, nonatomic) MenuDishesTableViewCell *touchedCell;
-@property (strong, nonatomic) MenuDishesOptionsTableViewCell *touchedOptionCell;
+@property (strong, nonatomic) PFObject *currentDishObject;
 
 @property (strong, nonatomic) NSMutableDictionary *orderedItemsAndQuantities;
 @property (strong, nonatomic) NSMutableArray *nonAcceptedDishOrderItems;
 
 @property (strong, nonatomic) NSMutableArray *objects;
+
+@property (nonatomic) BOOL addItems;
+@property (weak, nonatomic) IBOutlet UIButton *addItemsButton;
+@property (weak, nonatomic) IBOutlet UIButton *removeItemsButton;
+@property (weak, nonatomic) IBOutlet UILabel *addItemsStateLabel;
 
 @end
 
@@ -36,6 +40,9 @@
     
     // Listen for changes to the order.
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getParseData) name:@"addedItemToOrder" object:nil];
+    
+    _addItems = YES;
+    [self setItemStateLabel];
     
     [self getParseData];
 }
@@ -69,14 +76,32 @@
     [self dismissViewControllerAnimated:YES completion:nil];
 }
 
+- (IBAction)didTouchMinusButton:(id)sender {
+    if (_addItems) {
+        _addItems = NO;
+        [self setItemStateLabel];
+    }
+}
+
+- (IBAction)didTouchPlusButton:(id)sender {
+    if (!_addItems) {
+        _addItems = YES;
+        [self setItemStateLabel];
+    }
+}
+
+
+/*
+
 - (IBAction)plusDishButtonTouched:(id)sender {
     // Get the cell that the button was touched on.
-    _touchedCell = (MenuDishesTableViewCell *)[[sender superview] superview];
 
-    if (_touchedCell.isEditable) {
+    
+    
+    //if (_touchedCell.isEditable) {
         // This means the previously ordered item hasn't been accepted by the kitchen yet, so we can change its quantity.
         
-        PFObject *orderItem = [_touchedCell orderItemObject];
+        //PFObject *orderItem = [_touchedCell orderItemObject];
         
         orderItem[@"quantity"] = [NSNumber numberWithInt:[[orderItem valueForKey:@"quantity"] intValue] + 1];
         
@@ -84,10 +109,10 @@
             [self getParseData];
             [[NSNotificationCenter defaultCenter] postNotificationName:@"addedItemToOrder" object:nil];
         }];
-    } else {
+    //} else {
         // The dish has either not been ordered yet or it has already been accepted by the kitchen, so we must make a new object.
         
-        PFObject *dish = [_touchedCell dishObject];
+        //PFObject *dish = [_touchedCell dishObject];
         
         [dish fetchIfNeededInBackgroundWithBlock:^(PFObject *dishObject, NSError *error) {
             // Check if the dish has options.
@@ -190,7 +215,8 @@
     }
 }
 
-
+*/
+ 
 #pragma mark - Parse
 
 - (void)addOrderItemToOrderForDish:(PFObject *)dish {
@@ -213,12 +239,16 @@
     [orderItem setACL:acl];
     
     [orderItem saveInBackgroundWithBlock:^(BOOL succeeded, NSError *error) {
+        
         // Refetch the order items.
         [self getParseData];
         
         // Tell the View Order scene to reload its data.
         [[NSNotificationCenter defaultCenter] postNotificationName:@"addedItemToOrder" object:nil];
     }];
+    
+    NSString *notificationMessage = [NSString stringWithFormat:@"New order: %@ x %@ for Table %@", orderItem[@"quantity"], orderItem[@"name"], orderItem[@"tableNumber"]];
+    [self sendPushNotificationForNewOrderItemWithMessage:notificationMessage withObject:orderItem];
 }
 
 - (void)addOrderItemToOrderWithDish:(PFObject *)dish withOption:(NSDictionary *)option {
@@ -246,6 +276,22 @@
         // Tell the View Order scene to reload its data.
         [[NSNotificationCenter defaultCenter] postNotificationName:@"addedItemToOrder" object:nil];
     }];
+    
+    NSString *notificationMessage = [NSString stringWithFormat:@"New order: %@ x %@ for Table %@", orderItem[@"quantity"], orderItem[@"name"], orderItem[@"tableNumber"]];
+    [self sendPushNotificationForNewOrderItemWithMessage:notificationMessage withObject:orderItem];
+}
+
+- (void)sendPushNotificationForNewOrderItemWithMessage:(NSString *)message withObject:(PFObject *)object {
+    // Send a notification, and send the orderitemID as an object.
+    PFPush *push = [[PFPush alloc] init];
+    NSDictionary *data = [NSDictionary dictionaryWithObjectsAndKeys:
+                          message, @"alert",
+                          object.objectId, @"oID",
+                          nil];
+    [push setChannels:@[@"kitchen"]];
+    [push setData:data];
+    
+    [push sendPushInBackground];
 }
 
 // Override to customize what kind of query to perform on the class. The default is to query for
@@ -277,7 +323,7 @@
     PFQuery *getOrderItems = [PFQuery queryWithClassName:@"OrderItem"];
     [getOrderItems whereKey:@"forOrder" equalTo:_currentOrder];
     [getOrderItems whereKey:@"course" equalTo:[_currentCourse valueForKey:@"name"]];
-    
+        
     [getOrderItems findObjectsInBackgroundWithBlock:^(NSArray *orderItems, NSError *error) {
         if (!error) {
             // Create an array of all order items for this course.
@@ -334,7 +380,7 @@
             }
             
             // Update table.
-            [self.tableView reloadData];
+            [dishesTableView reloadData];
         }
     }];
 }
@@ -393,7 +439,7 @@
         if (currentObject[@"option"]) {
             // ORDER ITEM CELL with OPTIONS
             
-            MenuDishesOptionsTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:OptionCellIdentifier];
+            MenuDishesOptionsTableViewCell *cell = [dishesTableView dequeueReusableCellWithIdentifier:OptionCellIdentifier];
             
             // Update the dish name label.
             NSMutableAttributedString *dishString = [[NSMutableAttributedString alloc] initWithString:[[currentObject[@"option"] allKeys] firstObject]];
@@ -426,7 +472,7 @@
         } else {
             // ORDER ITEM CELL without OPTIONS
             
-            MenuDishesTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
+            MenuDishesTableViewCell *cell = [dishesTableView dequeueReusableCellWithIdentifier:CellIdentifier];
             
             NSMutableAttributedString *dishString = [[NSMutableAttributedString alloc] initWithString:currentObject[@"name"]];
             [dishString addAttribute:NSFontAttributeName value:[UIFont fontWithName:@"HelveticaNeue" size:18.0f] range:NSMakeRange(0, [dishString length])];
@@ -461,7 +507,7 @@
     } else {
         // DISH CELL
         
-        MenuDishesTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
+        MenuDishesTableViewCell *cell = [dishesTableView dequeueReusableCellWithIdentifier:CellIdentifier];
         
         NSMutableAttributedString *dishString = [[NSMutableAttributedString alloc] initWithString:currentObject[@"name"]];
         [dishString addAttribute:NSFontAttributeName value:[UIFont fontWithName:@"HelveticaNeue" size:18.0f] range:NSMakeRange(0, [dishString length])];
@@ -505,6 +551,92 @@
     }
 }
 
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+    PFObject *currentObject = [_objects objectAtIndex:[indexPath row]];
+        
+    // First work out if the user touched an order item cell or a dish cell.
+    if ([_currentDishObject.parseClassName isEqualToString:@"Dish"]) {
+        _currentDishObject = currentObject;
+        
+        // Ensure users can not decrement a Dish cell.
+        if (_addItems) {
+            // The dish has either not been ordered yet or it has already been accepted by the kitchen, so we must make a new object.
+            
+            [_currentDishObject fetchIfNeededInBackgroundWithBlock:^(PFObject *dishObject, NSError *error) {
+                
+                // Check if the dish has options.
+                if ([[dishObject[@"options"] allKeys] count]==0) {
+                    // If the item has already been ordered, increment the quantity.
+                    
+                    [self addOrderItemToOrderForDish:dishObject];
+                } else {
+                    // The dish has various options, so present them.
+                    
+                    [self performSegueWithIdentifier:@"selectOptionSegue" sender:nil];
+                }
+            }];
+        }
+    } else {
+        // This is an order item object.
+        PFObject *orderItemObject = currentObject;
+        
+        if (_addItems) {
+            // Work out if the dish has been accepted by the kitchen or not, i.e. is editable.
+            if ([orderItemObject[@"state"] isEqualToString:@"new"] || [orderItemObject[@"state"] isEqualToString:@"delivered"]) {
+                // This means the previously ordered item hasn't been accepted by the kitchen yet, so we can change its quantity.
+                
+                orderItemObject[@"quantity"] = [NSNumber numberWithInt:[[orderItemObject valueForKey:@"quantity"] intValue] + 1];
+                
+                [orderItemObject saveInBackgroundWithBlock:^(BOOL succeeded, NSError *error) {
+                    [self getParseData];
+                    [[NSNotificationCenter defaultCenter] postNotificationName:@"addedItemToOrder" object:nil];
+                }];
+            } else {
+                // The optioned dish has already been accepted, so we must make a new order item object with the same option.
+                
+                PFObject *dish = orderItemObject[@"whichDish"];
+                
+                [dish fetchIfNeededInBackgroundWithBlock:^(PFObject *dishObject, NSError *error) {
+                    // Find out if the order item had options, which will dictate how we create a new order item.
+                    if ([orderItemObject[@"option"] count] > 0) {
+                        [self addOrderItemToOrderWithDish:dishObject withOption:orderItemObject[@"option"]];
+                    } else {
+                        [self addOrderItemToOrderForDish:dishObject];
+                    }
+                }];
+                
+            }
+        } else {
+            // Decrement the order, or delete it.
+            
+            if ([orderItemObject[@"state"] isEqualToString:@"new"] || [orderItemObject[@"state"] isEqualToString:@"delivered"]) {
+                // The cell is editable, so we can decrement the quantity.
+                
+                // Safety check that this item can be edited.
+                if ([orderItemObject[@"state"] isEqualToString:@"new"] || [orderItemObject[@"state"] isEqualToString:@"delivered"]) {
+                    // If the quantity is one, delete the object.
+                    if ([[orderItemObject valueForKey:@"quantity"] isEqual:@1]) {
+                        [orderItemObject deleteInBackgroundWithBlock:^(BOOL succeeded, NSError *error) {
+                            [self getParseData];
+                            [[NSNotificationCenter defaultCenter] postNotificationName:@"addedItemToOrder" object:nil];
+                        }];
+                    } else {
+                        // Decrement the quantity.
+                        orderItemObject[@"quantity"] = [NSNumber numberWithInt:[[orderItemObject valueForKey:@"quantity"] intValue] - 1];
+                        
+                        [orderItemObject saveInBackgroundWithBlock:^(BOOL succeeded, NSError *error) {
+                            [self getParseData];
+                            [[NSNotificationCenter defaultCenter] postNotificationName:@"addedItemToOrder" object:nil];
+                        }];
+                    }
+                }
+            }
+        }
+    }
+    
+    [dishesTableView deselectRowAtIndexPath:indexPath animated:NO];
+}
+
 - (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath
 {
     // Return NO if you do not want the specified item to be editable.
@@ -527,17 +659,36 @@
     }
 }
 
+- (void)setItemStateLabel {
+    // Set the label for the current state, and update the buttons.
+    
+    NSMutableAttributedString *string;
+    
+    if (_addItems) {
+        string = [[NSMutableAttributedString alloc] initWithString:@"Add items"];
+        [string addAttribute:NSForegroundColorAttributeName value:[UIColor waiterGreenColour] range:NSMakeRange(0, [string length])];
+        
+        [_addItemsButton setAlpha:1];
+        [_removeItemsButton setAlpha:0.5];
+    } else {
+        string = [[NSMutableAttributedString alloc] initWithString:@"Remove items"];
+        [string addAttribute:NSForegroundColorAttributeName value:[UIColor managerRedColour] range:NSMakeRange(0, [string length])];
+        
+        [_addItemsButton setAlpha:0.5];
+        [_removeItemsButton setAlpha:1];
+    }
+    
+    [string addAttribute:NSFontAttributeName value:[UIFont fontWithName:@"HelveticaNeue-Light" size:18] range:NSMakeRange(0, [string length])];
+    [_addItemsStateLabel setAttributedText:string];
+}
 
 #pragma mark - Navigation
 
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
     if ([[segue identifier] isEqualToString:@"selectOptionSegue"]) {
-        // Retrieve the PFObject from the cell.
-        PFObject *dish=[_touchedCell dishObject];
-        
         // Pass the PFObject to the next scene.
         DishOptionsViewController *vc = (DishOptionsViewController *)[[segue destinationViewController] topViewController];
-        [vc setCurrentDish:dish];
+        [vc setCurrentDish:_currentDishObject];
         [vc setCurrentCourse:_currentCourse];
         [vc setCurrentOrder:_currentOrder];
     }

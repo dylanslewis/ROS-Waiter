@@ -25,6 +25,8 @@
 @implementation DishOptionsViewController
 
 - (void)viewDidLoad {
+    NSLog(@"%@", _currentDish);
+    
     [super viewDidLoad];
     
     [self getOrderItems];
@@ -182,6 +184,22 @@
         
         [self dismissViewControllerAnimated:YES completion:nil];
     }];
+    
+    NSString *notificationMessage = [NSString stringWithFormat:@"New order: %@ x %@ for Table %@", orderItem[@"quantity"], orderItem[@"name"], orderItem[@"tableNumber"]];
+    [self sendPushNotificationForNewOrderItemWithMessage:notificationMessage withObject:orderItem];
+}
+
+- (void)sendPushNotificationForNewOrderItemWithMessage:(NSString *)message withObject:(PFObject *)object {
+    // Send a notification, and send the orderitemID as an object.
+    PFPush *push = [[PFPush alloc] init];
+    NSDictionary *data = [NSDictionary dictionaryWithObjectsAndKeys:
+                          message, @"alert",
+                          object.objectId, @"oID",
+                          nil];
+    [push setChannels:@[@"kitchen"]];
+    [push setData:data];
+    
+    [push sendPushInBackground];
 }
 
 - (void)incrementQuantityOfOrderItem:(PFObject *)orderedItem {
@@ -201,6 +219,8 @@
     [getOrderItems whereKey:@"forOrder" equalTo:_currentOrder];
     [getOrderItems whereKey:@"course" equalTo:[_currentCourse valueForKey:@"name"]];
     [getOrderItems whereKey:@"name" equalTo:[_currentDish valueForKey:@"name"]];
+    
+    NSLog(@"%@", _currentDish);
     
     [getOrderItems findObjectsInBackgroundWithBlock:^(NSArray *orderItems, NSError *error) {
         if (!error) {
