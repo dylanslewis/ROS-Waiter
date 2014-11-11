@@ -90,133 +90,6 @@
     }
 }
 
-
-/*
-
-- (IBAction)plusDishButtonTouched:(id)sender {
-    // Get the cell that the button was touched on.
-
-    
-    
-    //if (_touchedCell.isEditable) {
-        // This means the previously ordered item hasn't been accepted by the kitchen yet, so we can change its quantity.
-        
-        //PFObject *orderItem = [_touchedCell orderItemObject];
-        
-        orderItem[@"quantity"] = [NSNumber numberWithInt:[[orderItem valueForKey:@"quantity"] intValue] + 1];
-        
-        [orderItem saveInBackgroundWithBlock:^(BOOL succeeded, NSError *error) {
-            [self getParseData];
-            [[NSNotificationCenter defaultCenter] postNotificationName:@"addedItemToOrder" object:nil];
-        }];
-    //} else {
-        // The dish has either not been ordered yet or it has already been accepted by the kitchen, so we must make a new object.
-        
-        //PFObject *dish = [_touchedCell dishObject];
-        
-        [dish fetchIfNeededInBackgroundWithBlock:^(PFObject *dishObject, NSError *error) {
-            // Check if the dish has options.
-            if ([[dishObject[@"options"] allKeys] count]==0) {
-                // If the item has already been ordered, increment the quantity.
-                
-                [self addOrderItemToOrderForDish:dishObject];
-            } else {
-                // The dish has various options, so present them.
-                
-                [self performSegueWithIdentifier:@"selectOptionSegue" sender:nil];
-            }
-        }];
-    }
-}
-
-- (IBAction)minusDishButtonTouched:(id)sender {
-    // Get the cell that was just touched.
-    _touchedCell = (MenuDishesTableViewCell *)[[sender superview] superview];
-    
-    if (_touchedCell.isEditable) {
-        // The cell is editable, so we can decrement the quantity.
-        
-        PFObject *orderItem = [_touchedCell orderItemObject];
-        
-        // If the quantity is one, delete the object.
-        if ([[orderItem valueForKey:@"quantity"] isEqual:@1]) {
-            [orderItem deleteInBackgroundWithBlock:^(BOOL succeeded, NSError *error) {
-                [self getParseData];
-                [[NSNotificationCenter defaultCenter] postNotificationName:@"addedItemToOrder" object:nil];
-            }];
-        } else {
-            // Decrement the quantity.
-            orderItem[@"quantity"] = [NSNumber numberWithInt:[[orderItem valueForKey:@"quantity"] intValue] - 1];
-            
-            [orderItem saveInBackgroundWithBlock:^(BOOL succeeded, NSError *error) {
-                [self getParseData];
-                [[NSNotificationCenter defaultCenter] postNotificationName:@"addedItemToOrder" object:nil];
-            }];
-        }
-    }
-}
-
-- (IBAction)optionPlusButtonTouched:(id)sender {
-    // This happens when the user touches the 'plus' of an option, as opposed to an Order Item. Increment the quantity.
-    
-    // Get the cell that the button was touched on.
-    _touchedOptionCell = (MenuDishesOptionsTableViewCell *)[[sender superview] superview];
-    
-    PFObject *orderItem = [_touchedOptionCell orderItemObject];
-    
-    if (_touchedOptionCell.isEditable) {
-        // This means the previously ordered item hasn't been accepted by the kitchen yet, so we can change its quantity.
-        
-        orderItem[@"quantity"] = [NSNumber numberWithInt:[[orderItem valueForKey:@"quantity"] intValue] + 1];
-        
-        [orderItem saveInBackgroundWithBlock:^(BOOL succeeded, NSError *error) {
-            [self getParseData];
-            [[NSNotificationCenter defaultCenter] postNotificationName:@"addedItemToOrder" object:nil];
-        }];
-    } else {
-        // The optioned dish has already been accepted, so we must make a new object.
-        
-        PFObject *dish = orderItem[@"whichDish"];
-        
-        [dish fetchIfNeededInBackgroundWithBlock:^(PFObject *dishObject, NSError *error) {
-            [self addOrderItemToOrderWithDish:dishObject withOption:orderItem[@"option"]];
-        }];
-
-    }
-}
-
-- (IBAction)optionMinusButtonTouched:(id)sender {
-    // If the user sets the quantity to zero for this option, delete it from the order.
-    _touchedOptionCell = (MenuDishesOptionsTableViewCell *)[[sender superview] superview];
-    
-    if (_touchedOptionCell.isEditable) {
-        // The cell is editable, so we can decrement the quantity.
-        
-        PFObject *orderItem = [_touchedOptionCell orderItemObject];
-        
-        // Safety check that this item can be edited.
-        if ([orderItem[@"state"] isEqualToString:@"new"] || [orderItem[@"state"] isEqualToString:@"delivered"]) {
-            // If the quantity is one, delete the object.
-            if ([[orderItem valueForKey:@"quantity"] isEqual:@1]) {
-                [orderItem deleteInBackgroundWithBlock:^(BOOL succeeded, NSError *error) {
-                    [self getParseData];
-                    [[NSNotificationCenter defaultCenter] postNotificationName:@"addedItemToOrder" object:nil];
-                }];
-            } else {
-                // Decrement the quantity.
-                orderItem[@"quantity"] = [NSNumber numberWithInt:[[orderItem valueForKey:@"quantity"] intValue] - 1];
-                
-                [orderItem saveInBackgroundWithBlock:^(BOOL succeeded, NSError *error) {
-                    [self getParseData];
-                    [[NSNotificationCenter defaultCenter] postNotificationName:@"addedItemToOrder" object:nil];
-                }];
-            }
-        }
-    }
-}
-
-*/
- 
 #pragma mark - Parse
 
 - (void)addOrderItemToOrderForDish:(PFObject *)dish {
@@ -297,14 +170,15 @@
 // Override to customize what kind of query to perform on the class. The default is to query for
 // all objects ordered by createdAt descending.
 - (void)getParseData {
+        
     PFQuery *query = [PFQuery queryWithClassName:@"Dish"];
     [query whereKey:@"ofCourse" equalTo:_currentCourse];
     
     // If no objects are loaded in memory, we look to the cache first to fill the table
     // and then subsequently do a query against the network.
-    if ([self.objects count] == 0) {
-        query.cachePolicy = kPFCachePolicyCacheThenNetwork;
-    }
+    //if ([self.objects count] == 0) {
+    //    query.cachePolicy = kPFCachePolicyCacheThenNetwork;
+    //}
     
     [query orderByAscending:@"name"];
     
@@ -553,15 +427,15 @@
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     PFObject *currentObject = [_objects objectAtIndex:[indexPath row]];
-        
+    
     // First work out if the user touched an order item cell or a dish cell.
-    if ([_currentDishObject.parseClassName isEqualToString:@"Dish"]) {
+    if ([currentObject.parseClassName isEqualToString:@"Dish"]) {
         _currentDishObject = currentObject;
         
         // Ensure users can not decrement a Dish cell.
         if (_addItems) {
             // The dish has either not been ordered yet or it has already been accepted by the kitchen, so we must make a new object.
-            
+        
             [_currentDishObject fetchIfNeededInBackgroundWithBlock:^(PFObject *dishObject, NSError *error) {
                 
                 // Check if the dish has options.

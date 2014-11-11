@@ -176,9 +176,7 @@
     CourseTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
     
     // Extract the name of this section by looking in the Dictionary's keys.
-    NSString *keyForSection = [[_coursesByType allKeys] objectAtIndex:[indexPath section]];
-    
-    PFObject *course = [[_coursesByType valueForKey:keyForSection] objectAtIndex:[indexPath row]];
+    PFObject *course = [self sectionedObjectAtIndexPath:indexPath fromDictionary:_coursesByType];
     
     // Configure the cell
     cell.courseNameLabel.text = [course objectForKey:@"name"];
@@ -192,6 +190,13 @@
     return NO;
 }
 
+#pragma mark - Other
+
+- (PFObject *)sectionedObjectAtIndexPath:(NSIndexPath *)indexPath fromDictionary:(NSDictionary *)dictionary {
+    NSString *keyForSection = [[dictionary allKeys] objectAtIndex:[indexPath section]];
+    
+    return [[dictionary valueForKey:keyForSection] objectAtIndex:[indexPath row]];
+}
 
 #pragma mark - Navigation
 
@@ -199,7 +204,7 @@
     if ([[segue identifier] isEqualToString:@"showDishesSegue"]) {
         // Retrieve the PFObject from the cell.
         NSIndexPath *indexPath = [self.tableView indexPathForSelectedRow];
-        PFObject *course=[self objectAtIndexPath:indexPath];
+        PFObject *course = [self sectionedObjectAtIndexPath:indexPath fromDictionary:_coursesByType];
         
         // Pass the PFObject to the next scene.
         [[segue destinationViewController] setCurrentCourse:course];

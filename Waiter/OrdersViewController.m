@@ -9,6 +9,7 @@
 #import "OrdersViewController.h"
 #import "ViewOrderViewController.h"
 #import "OrdersCollectionViewCell.h"
+#import "UIColor+ApplicationColours.h"
 
 @interface OrdersViewController ()
 
@@ -69,7 +70,7 @@
                                              // Once we have confirmed there is a logged in waiter, get their orders.
                                              [self getParseData];
                                          }
-                                     }];
+        }];
     }
 }
 
@@ -188,6 +189,9 @@
     order[@"state"]=@"new";
     order[@"totalPrice"]=@0.00;
     order[@"waiterName"] = [NSString stringWithFormat:@"%@ %@", _currentWaiter[@"firstName"], _currentWaiter[@"surname"]];
+    
+    // Set the initial closest completion date as now.
+    order[@"closestCompletionDate"] = [NSDate date];
      
     // Relate this new order to the currently logged in Waiter.
     order[@"forWaiter"] = _currentWaiter;
@@ -223,7 +227,60 @@
         
     // Configure the cell
     cell.tableNumberLabel.text = [NSString stringWithFormat:@"%@", [order valueForKey:@"tableNumber"]];
-    cell.orderStateLabel.text = order[@"state"];
+    
+    NSString *stateText;
+    UIColor *stateColour;
+    float stateLabelTextSize;
+    
+    if ([order[@"state"] isEqualToString:@"readyToCollect"]) {
+        stateText =  @"Collect Dishes";
+        
+        // Make the text green.
+        stateColour = [UIColor waiterGreenColour];
+        
+    } else if ([order[@"state"] isEqualToString:@"itemRejected"]) {
+        stateText =  @"Items Rejected";
+        
+        // Make the text red.
+        stateColour = [UIColor managerRedColour];
+    } else if ([order[@"state"] isEqualToString:@"estimatesSet"]) {
+        // Work out the time until completion of the nearest dish.
+        NSDate *currentDate = [NSDate date];
+        NSDate *completionDate = (NSDate *)order[@"closestCompletionDate"];
+        NSTimeInterval secondsBetween = [completionDate timeIntervalSinceDate:currentDate];
+        int numberOfMinutes = secondsBetween / 60;
+
+        stateText =  [NSString stringWithFormat:@"Ready in %d mins", numberOfMinutes];
+        
+        // Make the text green.
+        stateColour = [UIColor waiterGreenColour];
+    } else if ([order[@"state"] isEqualToString:@"itemsCollected"]) {
+        stateText =  @"Items Collected";
+        
+        // Make the text grey.
+        stateColour = [UIColor lightGrayColor];
+    } else if ([order[@"state"] isEqualToString:@"itemsOrdered"]) {
+        stateText =  @"Waiting for Kitchen";
+        
+        // Make the text blue.
+        stateColour = [UIColor kitchenBlueColour];
+    } else {
+        // The order is new.
+        stateText =  @"New Order";
+        
+        // Make the text grey.
+        stateColour = [UIColor lightGrayColor];
+    }
+    
+    stateLabelTextSize = 20;
+    
+    NSMutableAttributedString *stateLabel;
+    
+    // Apply the attributes to the attributed string, and then the label.
+    stateLabel = [[NSMutableAttributedString alloc] initWithString:stateText];
+    [stateLabel addAttribute:NSFontAttributeName value:[UIFont fontWithName:@"HelveticaNeue-Light" size:stateLabelTextSize] range:NSMakeRange(0, [stateLabel length])];
+    [stateLabel addAttribute:NSForegroundColorAttributeName value:stateColour range:NSMakeRange(0, [stateLabel length])];
+    cell.orderStateLabel.attributedText = stateLabel;
     
     return cell;
 }

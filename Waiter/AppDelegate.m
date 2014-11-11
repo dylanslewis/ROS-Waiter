@@ -14,6 +14,10 @@
 
 @interface AppDelegate ()
 
+@property (strong, nonatomic) UIAlertView *alertView;
+
+@property (strong, nonatomic) PFObject *orderObject;
+
 @end
 
 @implementation AppDelegate
@@ -86,6 +90,9 @@
 
 - (void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken {
     // Store the deviceToken in the current installation and save it to Parse.
+    
+    #warning Put in some error checking for logged in users.
+    
     PFInstallation *currentInstallation = [PFInstallation currentInstallation];
     currentInstallation[@"user"] = [PFUser currentUser];
     [currentInstallation setDeviceTokenFromData:deviceToken];
@@ -94,6 +101,26 @@
 }
 
 - (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo {
+    NSString *orderID = [userInfo objectForKey:@"oID"];
+    PFObject *targetOrder = [PFObject objectWithoutDataWithClassName:@"Order"
+                                                            objectId:orderID];
+    
+    
+    
+    NSLog(@"THIS IS RUNNING");
+    
+    // Fetch order object
+    [targetOrder fetchIfNeededInBackgroundWithBlock:^(PFObject *orderObject, NSError *error) {
+        // Update the badge.
+        PFQuery *query = [PFQuery queryWithClassName:@"Order"];
+        [query whereKey:@"state" containedIn:@[@"readyToCollect", @"itemRejected"]];
+        [query whereKey:@"waiterName" equalTo:orderObject[@"waiterName"]];
+        [query countObjectsInBackgroundWithBlock:^(int number, NSError *error) {
+            [UIApplication sharedApplication].applicationIconBadgeNumber = number;
+        }];
+
+    }];
+    
     [PFPush handlePush:userInfo];
 }
 
@@ -103,23 +130,66 @@
     PFObject *targetOrder = [PFObject objectWithoutDataWithClassName:@"Order"
                                                             objectId:orderID];
     
+    
+    
     // Fetch order object
     [targetOrder fetchIfNeededInBackgroundWithBlock:^(PFObject *orderObject, NSError *error) {
         // Show orders view controller
         if (error) {
             handler(UIBackgroundFetchResultFailed);
         } else if ([PFUser currentUser]) {
-            UIStoryboard *mainStoryboard = [UIStoryboard storyboardWithName:@"Main" bundle: nil];
-            ViewOrderViewController *controller = (ViewOrderViewController *)[mainStoryboard instantiateViewControllerWithIdentifier: @"ViewOrder"];
-            [controller setCurrentOrder:orderObject];
-            [self.window.rootViewController presentViewController: controller animated:YES completion:nil];
-    
+            // We now need to take the user to the order page for this order object.
+            
+            _orderObject = orderObject;
+            
+            
+            
+            
+            NSString *message = [NSString stringWithFormat:@"Dishes for Table %@ are now ready for collection", orderObject[@"tableNumber"]];
+            
+            [self displayBasicAlertWithTitle:@"Dishes Ready for Collection" withMessage:message];
+            
             handler(UIBackgroundFetchResultNewData);
         } else {
             handler(UIBackgroundFetchResultNoData);
         }
     }];
 }
+
+#pragma mark - Alert view handling
+
+- (void)displayBasicAlertWithTitle:(NSString *)title withMessage:(NSString *)message {
+    _alertView=[[UIAlertView alloc] initWithTitle:title
+                                          message:message
+                                         delegate:self
+                                cancelButtonTitle:@"Dismiss"
+                                otherButtonTitles:@"Go to order", nil];
+    [_alertView setAlertViewStyle:UIAlertViewStyleDefault];
+    
+    // Display the alert.
+    [_alertView show];
+}
+
+- (void)alertView:(UIAlertView *)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex
+{
+    if ([alertView.title isEqualToString:@"Dishes Ready for Collection"]) {
+        if (buttonIndex==1) {
+            [self showViewControllerForOrder:_orderObject];
+        }
+    }
+}
+
+- (void)showViewControllerForOrder:(PFObject *)orderObject {
+    NSLog(@"%@", _window);
+    
+    UIStoryboard *mainStoryboard = [UIStoryboard storyboardWithName:@"Main" bundle: nil];
+    ViewOrderViewController *controller = (ViewOrderViewController *)[mainStoryboard instantiateViewControllerWithIdentifier: @"ViewOrder"];
+    [controller setCurrentOrder:orderObject];
+    [self.window.rootViewController presentViewController:controller animated:YES completion:nil];
+
+}
+
+
 
 - (void)applicationWillResignActive:(UIApplication *)application {
     // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.

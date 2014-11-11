@@ -91,6 +91,11 @@
 - (IBAction)didTouchCollectDishesButton:(id)sender {
     // Mark all the 'ready' items as 'collected'
     [self didCollectAllItemsForOrder:_currentOrder];
+    
+    #warning Make this handle resetting the closestCompletionDate to the closest dish.
+    
+    _currentOrder[@"closestCompletionDate"] = [NSDate date];
+    [_currentOrder saveInBackground];
 }
 
 
@@ -189,6 +194,10 @@
                 // Group all drinks together.
                 if ([[orderItem valueForKey:@"type"] isEqualToString:@"Drink"]) {
                     courseName = @"Drinks";
+                } else if ([[orderItem valueForKey:@"state"] isEqualToString:@"ready"]) {
+                    courseName = [NSString stringWithFormat:@"%@ ready to collect", courseName];
+                } else if ([[orderItem valueForKey:@"state"] isEqualToString:@"rejected"]) {
+                    courseName = [NSString stringWithFormat:@"Rejected %@", [courseName lowercaseString]];
                 }
                 
                 // If we don't already have this course, add it.
@@ -365,9 +374,16 @@
     
     UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(10, 5, tableView.frame.size.width, 18)];
     [label setFont:[UIFont systemFontOfSize:14]];
-    label.textColor = [UIColor grayColor];
-    
     NSString *string = [[_orderItemSections allKeys] objectAtIndex:section];
+    
+    if ([string containsString:@"Rejected"]) {
+        label.textColor = [UIColor managerRedColour];
+    } else if ([string containsString:@"ready to collect"]) {
+        label.textColor = [UIColor waiterGreenColour];
+    } else {
+        label.textColor = [UIColor grayColor];
+    }
+    
     
     [label setText:string];
     [view addSubview:label];
@@ -431,11 +447,21 @@
         NSDate *currentDate = [NSDate date];
         NSDate *completionDate = (NSDate *)orderItem[@"estimatedCompletionTime"];
         NSTimeInterval secondsBetween = [completionDate timeIntervalSinceDate:currentDate];
-        
         int numberOfMinutes = secondsBetween / 60;
         
+        // Set the closest completion date as an Order variable.
+        NSDate *closestCompletionDate = (NSDate *)_currentOrder[@"closestCompletionDate"];
+        
+        if ([closestCompletionDate compare:completionDate] == NSOrderedDescending) {
+            _currentOrder[@"closestCompletionDate"] = completionDate;
+        }
+        
         // Set basic attributations.
-        stateAttributedString = [[NSMutableAttributedString alloc] initWithString:[NSString stringWithFormat:@"%d mins", numberOfMinutes]];
+        if ([currentDate compare:completionDate] == NSOrderedDescending) {
+            stateAttributedString = [[NSMutableAttributedString alloc] initWithString:@"due"];
+        } else {
+            stateAttributedString = [[NSMutableAttributedString alloc] initWithString:[NSString stringWithFormat:@"%d mins", numberOfMinutes]];
+        }
         [stateAttributedString addAttribute:NSForegroundColorAttributeName value:[UIColor waiterGreenColour] range:NSMakeRange(0, [stateAttributedString length])];
         
         [cell.stateView setBackgroundColor:[UIColor waiterGreenColour]];
@@ -443,6 +469,11 @@
         // Set basic attributations.
         stateAttributedString = [[NSMutableAttributedString alloc] initWithString:@"rejected"];
         [stateAttributedString addAttribute:NSForegroundColorAttributeName value:[UIColor managerRedColour] range:NSMakeRange(0, [stateAttributedString length])];
+        
+        // Set everything in the cell to grey.
+        [dishAttributedString addAttribute:NSForegroundColorAttributeName value:[UIColor managerRedColour] range:NSMakeRange(0, [dishAttributedString length])];
+        [quantityAttributedString addAttribute:NSForegroundColorAttributeName value:[UIColor managerRedColour] range:NSMakeRange(0, [quantityAttributedString length])];
+        [priceAttributedString addAttribute:NSForegroundColorAttributeName value:[UIColor managerRedColour] range:NSMakeRange(0, [priceAttributedString length])];
         
         [cell.stateView setBackgroundColor:[UIColor managerRedColour]];
     } else if ([orderItem[@"state"] isEqualToString:@"ready"]) {

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="6250" systemVersion="14A388a" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="VP2-05-ARe">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="6250" systemVersion="14B17" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="VP2-05-ARe">
     <dependencies>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="6244"/>
         <capability name="Alignment constraints with different attributes" minToolsVersion="5.1"/>
@@ -206,7 +206,7 @@
         <!--Orders-->
         <scene sceneID="Vnu-kr-HKC">
             <objects>
-                <viewController storyboardIdentifier="Orders" id="l1c-XN-pdz" customClass="OrdersViewController" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="Orders" title="Orders" id="l1c-XN-pdz" customClass="OrdersViewController" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="6Tu-pr-ehf"/>
                         <viewControllerLayoutGuide type="bottom" id="APW-qt-vug"/>
@@ -346,7 +346,7 @@
                                                             <attributes>
                                                                 <color key="NSColor" cocoaTouchSystemColor="darkTextColor"/>
                                                                 <font key="NSFont" size="12" name="HelveticaNeue"/>
-                                                                <paragraphStyle key="NSParagraphStyle" alignment="left" lineBreakMode="wordWrapping" baseWritingDirection="natural"/>
+                                                                <paragraphStyle key="NSParagraphStyle" alignment="center" lineBreakMode="wordWrapping" baseWritingDirection="natural"/>
                                                             </attributes>
                                                         </fragment>
                                                     </attributedString>
@@ -1190,9 +1190,8 @@
                                                             <exclude reference="zlL-4n-HkK"/>
                                                         </mask>
                                                     </variation>
-                                                    <variation key="widthClass=compact" misplaced="YES">
+                                                    <variation key="widthClass=compact">
                                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                                        <rect key="frame" x="264" y="8" width="49" height="17"/>
                                                         <mask key="constraints">
                                                             <include reference="zlL-4n-HkK"/>
                                                         </mask>
@@ -1220,9 +1219,8 @@
                                                             <exclude reference="HsC-c3-87Z"/>
                                                         </mask>
                                                     </variation>
-                                                    <variation key="widthClass=compact" misplaced="YES">
+                                                    <variation key="widthClass=compact">
                                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                                        <rect key="frame" x="264" y="23" width="48" height="12"/>
                                                         <mask key="constraints">
                                                             <include reference="HsC-c3-87Z"/>
                                                         </mask>
@@ -1880,12 +1878,18 @@
                                                     <fontDescription key="fontDescription" name="HelveticaNeue-Thin" family="Helvetica Neue" pointSize="17"/>
                                                     <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
                                                     <nil key="highlightedColor"/>
+                                                    <variation key="widthClass=compact" misplaced="YES">
+                                                        <rect key="frame" x="260" y="12" width="52" height="21"/>
+                                                    </variation>
                                                 </label>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="from" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="g4L-uE-bJV">
                                                     <rect key="frame" x="0.0" y="-21" width="42" height="21"/>
                                                     <fontDescription key="fontDescription" name="HelveticaNeue-Thin" family="Helvetica Neue" pointSize="12"/>
                                                     <color key="textColor" red="0.14117647059999999" green="0.33725490200000002" blue="0.15686274510000001" alpha="1" colorSpace="calibratedRGB"/>
                                                     <nil key="highlightedColor"/>
+                                                    <variation key="widthClass=compact" misplaced="YES">
+                                                        <rect key="frame" x="289" y="0.0" width="23" height="15"/>
+                                                    </variation>
                                                 </label>
                                             </subviews>
                                             <constraints>
@@ -2006,6 +2010,9 @@
                                                     <rect key="frame" x="0.0" y="-21" width="42" height="21"/>
                                                     <fontDescription key="fontDescription" name="HelveticaNeue-Thin" family="Helvetica Neue" pointSize="17"/>
                                                     <nil key="highlightedColor"/>
+                                                    <variation key="widthClass=compact" misplaced="YES">
+                                                        <rect key="frame" x="260" y="11" width="52" height="21"/>
+                                                    </variation>
                                                 </label>
                                             </subviews>
                                             <constraints>
@@ -2644,10 +2651,10 @@
             </objects>
             <point key="canvasLocation" x="1377" y="3598"/>
         </scene>
-        <!--Tab Bar Controller-->
+        <!--TabBarController-->
         <scene sceneID="hQS-um-BYq">
             <objects>
-                <tabBarController automaticallyAdjustsScrollViewInsets="NO" id="VP2-05-ARe" sceneMemberID="viewController">
+                <tabBarController title="TabBarController" automaticallyAdjustsScrollViewInsets="NO" id="VP2-05-ARe" sceneMemberID="viewController">
                     <toolbarItems/>
                     <nil key="simulatedBottomBarMetrics"/>
                     <tabBar key="tabBar" contentMode="scaleToFill" id="Re2-hG-p0D">
