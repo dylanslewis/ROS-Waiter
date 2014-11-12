@@ -245,13 +245,14 @@
         stateColour = [UIColor managerRedColour];
     } else if ([order[@"state"] isEqualToString:@"estimatesSet"]) {
         // Work out the time until completion of the nearest dish.
-        NSDate *currentDate = [NSDate date];
-        NSDate *completionDate = (NSDate *)order[@"closestCompletionDate"];
-        NSTimeInterval secondsBetween = [completionDate timeIntervalSinceDate:currentDate];
-        int numberOfMinutes = secondsBetween / 60;
-
-        stateText =  [NSString stringWithFormat:@"Ready in %d mins", numberOfMinutes];
+        int timeUntilCompletion = [self timeUntilDate:(NSDate *)order[@"closestCompletionDate"]];
         
+        if (timeUntilCompletion < 1) {
+            stateText = @"Dishes due now";
+        } else {
+            stateText =  [NSString stringWithFormat:@"Ready in %d mins", timeUntilCompletion];
+        }
+            
         // Make the text green.
         stateColour = [UIColor waiterGreenColour];
     } else if ([order[@"state"] isEqualToString:@"itemsCollected"]) {
@@ -301,6 +302,23 @@
     }
 }
 
+#pragma mark - Other
+
+
+
+#pragma mark - Calculations
+
+- (int)timeUntilDate:(NSDate *)date {
+    // Work out the time until date.
+    NSDate *currentDate = [NSDate date];
+    NSTimeInterval secondsBetween = [date timeIntervalSinceDate:currentDate];
+    int numberOfMinutes = secondsBetween / 60;
+    
+    // Increment numberOfMinutes so that '0 mins' appears as '1 min'.
+    numberOfMinutes++;
+    
+    return numberOfMinutes;
+}
 
 #pragma mark - Navigation
 

@@ -91,11 +91,6 @@
 - (IBAction)didTouchCollectDishesButton:(id)sender {
     // Mark all the 'ready' items as 'collected'
     [self didCollectAllItemsForOrder:_currentOrder];
-    
-    #warning Make this handle resetting the closestCompletionDate to the closest dish.
-    
-    _currentOrder[@"closestCompletionDate"] = [NSDate date];
-    [_currentOrder saveInBackground];
 }
 
 
@@ -192,11 +187,14 @@
                 _totalBill = [[NSNumber alloc] initWithFloat:[currentOrderItemPrice floatValue] + [_totalBill floatValue]];
                 
                 // Group all drinks together.
-                if ([[orderItem valueForKey:@"type"] isEqualToString:@"Drink"]) {
+                if ([orderItem[@"type"] isEqualToString:@"Drink"]) {
                     courseName = @"Drinks";
-                } else if ([[orderItem valueForKey:@"state"] isEqualToString:@"ready"]) {
+                } else if ([orderItem[@"state"] isEqualToString:@"ready"]) {
                     courseName = [NSString stringWithFormat:@"%@ ready to collect", courseName];
-                } else if ([[orderItem valueForKey:@"state"] isEqualToString:@"rejected"]) {
+                    
+                    [_collectDishesLabel setHidden:NO];
+                    [_collectDishesButton setHidden:NO];
+                } else if ([orderItem[@"state"] isEqualToString:@"rejected"]) {
                     courseName = [NSString stringWithFormat:@"Rejected %@", [courseName lowercaseString]];
                 }
                 
@@ -213,11 +211,23 @@
                     
                     [_orderItemSections setObject:orderItemsForCourse forKey:courseName];
                 }
+
+                // Check if this item is the nearest item to completion.
+                NSDate *currentDate = [NSDate date];
+                NSDate *closestCompletionDate = (NSDate *)_currentOrder[@"closestCompletionDate"];
+                NSDate *completionDate = (NSDate *)orderItem[@"estimatedCompletionTime"];
                 
-                // Check if any items are ready to collect.
-                if ([orderItem[@"state"] isEqualToString:@"ready"]) {
-                    [_collectDishesLabel setHidden:NO];
-                    [_collectDishesButton setHidden:NO];
+                // If the current date is later on than the currently set cloests completion date, set the closest completion date to be this item, initially.
+                if (completionDate != nil) {
+                    if ([currentDate compare:closestCompletionDate] == NSOrderedDescending) {
+                        _currentOrder[@"closestCompletionDate"] = completionDate;
+                        [_currentOrder saveInBackground];
+                    } else {
+                        if ([closestCompletionDate compare:completionDate] == NSOrderedDescending) {
+                            _currentOrder[@"closestCompletionDate"] = completionDate;
+                            [_currentOrder saveInBackground];
+                        }
+                    }
                 }
             }
             
@@ -403,7 +413,7 @@
 
     OrderItemTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
     
-    NSMutableAttributedString *dishAttributedString, *quantityAttributedString, *priceAttributedString, *stateAttributedString;
+    NSAttributedString *dishAttributedString, *quantityAttributedString, *priceAttributedString, *stateAttributedString;
     
     if ([[orderItem[@"option"] allKeys] count]>0) {
         // Item has option.
@@ -414,94 +424,72 @@
         // Concatenate the option name string with the dish name string: Option DishName.
         NSString *concatenatedString = [NSString stringWithFormat:@"%@ %@", [[optionKeyValuePair allKeys] firstObject], [orderItem valueForKey:@"name"]];
         
-        // Set basic attributations.
-        dishAttributedString = [[NSMutableAttributedString alloc] initWithString:concatenatedString];
+        // Create the string
+        dishAttributedString = [self createAttributedStringWithText:concatenatedString withColour:[UIColor waiterGreenColour] withFontSize:20];
         
-        #warning Font attribute not working
-        [dishAttributedString addAttribute:NSFontAttributeName value:[UIFont fontWithName:@"HelveticaNeue-Light" size:20.0f] range:NSMakeRange(0, [dishAttributedString length])];
-        
-        // Set the option name to blue.
-        [dishAttributedString addAttribute:NSForegroundColorAttributeName value:[UIColor kitchenBlueColour] range:NSMakeRange(0, [[[optionKeyValuePair allKeys] firstObject] length])];
+        // Change the option name to blue.
+        [self changeString:dishAttributedString toColour:[UIColor kitchenBlueColour] forRange:NSMakeRange(0, [[[optionKeyValuePair allKeys] firstObject] length])];
     } else {
         // Item does not have options.
         
         // Store the dish name in an attribtued string.
-        dishAttributedString = [[NSMutableAttributedString alloc] initWithString:[orderItem valueForKey:@"name"]];
-        [dishAttributedString addAttribute:NSFontAttributeName value:[UIFont fontWithName:@"HelveticaNeue-Light" size:20.0f] range:NSMakeRange(0, [dishAttributedString length])];
+        dishAttributedString = [self createAttributedStringWithText:[orderItem valueForKey:@"name"] withColour:[UIColor waiterGreenColour] withFontSize:20];
     }
     
-    [cell.orderItemNameLabel setAttributedText:dishAttributedString];
+    // Create the price and quantity strings.
+    priceAttributedString = [self createAttributedStringWithText:[NSString stringWithFormat:@"£%@", [orderItem objectForKey:@"price"]] withColour:[UIColor blackColor] withFontSize:14];
+    quantityAttributedString = [self createAttributedStringWithText:[NSString stringWithFormat:@"%@ x", [orderItem objectForKey:@"quantity"]] withColour:[UIColor blackColor] withFontSize:18];
     
-    // Set the text for the price and quantity strings.
-    priceAttributedString = [[NSMutableAttributedString alloc] initWithString:[NSString stringWithFormat:@"£%@", [orderItem objectForKey:@"price"]]];
-    quantityAttributedString = [[NSMutableAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@ x", [orderItem objectForKey:@"quantity"]]];
+    NSString *stateString;
+    UIColor *stateColour;
     
     if ([orderItem[@"state"] isEqualToString:@"delivered"]) {
-        // Set basic attributations.
-        stateAttributedString = [[NSMutableAttributedString alloc] initWithString:@"delivered"];
-        [stateAttributedString addAttribute:NSForegroundColorAttributeName value:[UIColor kitchenBlueColour] range:NSMakeRange(0, [stateAttributedString length])];
-        
-        [cell.stateView setBackgroundColor:[UIColor kitchenBlueColour]];
+        stateString = @"delivered";
+        stateColour = [UIColor kitchenBlueColour];
     } else if ([orderItem[@"state"] isEqualToString:@"accepted"]) {
-        // Work out the time until completion.
-        NSDate *currentDate = [NSDate date];
-        NSDate *completionDate = (NSDate *)orderItem[@"estimatedCompletionTime"];
-        NSTimeInterval secondsBetween = [completionDate timeIntervalSinceDate:currentDate];
-        int numberOfMinutes = secondsBetween / 60;
+        int timeUntilCompletion = [self timeUntilDate:(NSDate *)orderItem[@"estimatedCompletionTime"]];
         
-        // Set the closest completion date as an Order variable.
-        NSDate *closestCompletionDate = (NSDate *)_currentOrder[@"closestCompletionDate"];
-        
-        if ([closestCompletionDate compare:completionDate] == NSOrderedDescending) {
-            _currentOrder[@"closestCompletionDate"] = completionDate;
-        }
-        
-        // Set basic attributations.
-        if ([currentDate compare:completionDate] == NSOrderedDescending) {
-            stateAttributedString = [[NSMutableAttributedString alloc] initWithString:@"due"];
+        if (timeUntilCompletion<1) {
+            stateString = @"due";
         } else {
-            stateAttributedString = [[NSMutableAttributedString alloc] initWithString:[NSString stringWithFormat:@"%d mins", numberOfMinutes]];
+            NSString *minString;
+            if (timeUntilCompletion==1) {
+                minString = @"min";
+            } else {
+                minString = @"mins";
+            }
+            
+            stateString = [NSString stringWithFormat:@"%d %@", timeUntilCompletion, minString];
         }
-        [stateAttributedString addAttribute:NSForegroundColorAttributeName value:[UIColor waiterGreenColour] range:NSMakeRange(0, [stateAttributedString length])];
         
-        [cell.stateView setBackgroundColor:[UIColor waiterGreenColour]];
+        stateColour = [UIColor waiterGreenColour];
     } else if ([orderItem[@"state"] isEqualToString:@"rejected"]) {
-        // Set basic attributations.
-        stateAttributedString = [[NSMutableAttributedString alloc] initWithString:@"rejected"];
-        [stateAttributedString addAttribute:NSForegroundColorAttributeName value:[UIColor managerRedColour] range:NSMakeRange(0, [stateAttributedString length])];
+        stateString = @"rejected";
+        stateColour = [UIColor managerRedColour];
         
-        // Set everything in the cell to grey.
-        [dishAttributedString addAttribute:NSForegroundColorAttributeName value:[UIColor managerRedColour] range:NSMakeRange(0, [dishAttributedString length])];
-        [quantityAttributedString addAttribute:NSForegroundColorAttributeName value:[UIColor managerRedColour] range:NSMakeRange(0, [quantityAttributedString length])];
-        [priceAttributedString addAttribute:NSForegroundColorAttributeName value:[UIColor managerRedColour] range:NSMakeRange(0, [priceAttributedString length])];
-        
-        [cell.stateView setBackgroundColor:[UIColor managerRedColour]];
+        // Set the colour of all other cell elements to red.
+        dishAttributedString = [self changeString:dishAttributedString toColour:stateColour forRange:NSMakeRange(0, [dishAttributedString length])];
+        quantityAttributedString = [self changeString:quantityAttributedString toColour:stateColour forRange:NSMakeRange(0, [quantityAttributedString length])];
+        priceAttributedString = [self changeString:priceAttributedString toColour:stateColour forRange:NSMakeRange(0, [priceAttributedString length])];
     } else if ([orderItem[@"state"] isEqualToString:@"ready"]) {
-        // Set basic attributations.
-        stateAttributedString = [[NSMutableAttributedString alloc] initWithString:@"ready"];
-        [stateAttributedString addAttribute:NSForegroundColorAttributeName value:[UIColor waiterGreenColour] range:NSMakeRange(0, [stateAttributedString length])];
-        
-        [cell.stateView setBackgroundColor:[UIColor waiterGreenColour]];
+        stateString = @"ready";
+        stateColour = [UIColor waiterGreenColour];
     } else if ([orderItem[@"state"] isEqualToString:@"collected"]) {
-        // Set basic attributations.
-        stateAttributedString = [[NSMutableAttributedString alloc] initWithString:@"collected"];
-        [stateAttributedString addAttribute:NSForegroundColorAttributeName value:[UIColor lightGrayColor] range:NSMakeRange(0, [stateAttributedString length])];
+        stateString = @"collected";
+        stateColour = [UIColor lightGrayColor];
         
-        // Set everything in the cell to grey.
-        [dishAttributedString addAttribute:NSForegroundColorAttributeName value:[UIColor lightGrayColor] range:NSMakeRange(0, [dishAttributedString length])];
-        [quantityAttributedString addAttribute:NSForegroundColorAttributeName value:[UIColor lightGrayColor] range:NSMakeRange(0, [quantityAttributedString length])];
-        [priceAttributedString addAttribute:NSForegroundColorAttributeName value:[UIColor lightGrayColor] range:NSMakeRange(0, [priceAttributedString length])];
-        
-        [cell.stateView setBackgroundColor:[UIColor lightGrayColor]];
+        // Set the colour of all other cell elements to red.
+        dishAttributedString = [self changeString:dishAttributedString toColour:stateColour forRange:NSMakeRange(0, [dishAttributedString length])];
+        quantityAttributedString = [self changeString:quantityAttributedString toColour:stateColour forRange:NSMakeRange(0, [quantityAttributedString length])];
+        priceAttributedString = [self changeString:priceAttributedString toColour:stateColour forRange:NSMakeRange(0, [priceAttributedString length])];
     } else {
         [cell.stateView setHidden:YES];
         [cell.orderItemStateLabel setHidden:YES];
     }
     
-    // Set the fonts and sizes of labels.
-    [stateAttributedString addAttribute:NSFontAttributeName value:[UIFont fontWithName:@"HelveticaNeue-Light" size:12] range:NSMakeRange(0, [stateAttributedString length])];
-    [quantityAttributedString addAttribute:NSFontAttributeName value:[UIFont fontWithName:@"HelveticaNeue-Light" size:18] range:NSMakeRange(0, [quantityAttributedString length])];
-    [priceAttributedString addAttribute:NSFontAttributeName value:[UIFont fontWithName:@"HelveticaNeue-Light" size:14] range:NSMakeRange(0, [priceAttributedString length])];
+    if (![cell.stateView isHidden]) {
+        stateAttributedString = [self createAttributedStringWithText:stateString withColour:stateColour withFontSize:12];
+    }
     
     // Apply the attributed strings to the labels.
     [cell.orderItemNameLabel setAttributedText:dishAttributedString];
@@ -509,10 +497,42 @@
     [cell.orderItemPriceLabel setAttributedText:priceAttributedString];
     [cell.orderItemStateLabel setAttributedText:stateAttributedString];
     
+    // Set the state label colour.
+    [cell.stateView setBackgroundColor:stateColour];
+    
     return cell;
 }
 
+#pragma mark - Other
+
+- (NSAttributedString *)createAttributedStringWithText:(NSString *)text withColour:(UIColor *)colour withFontSize:(float)size {
+    NSMutableAttributedString *attributedString = [[NSMutableAttributedString alloc] initWithString:text];
+    [attributedString addAttribute:NSFontAttributeName value:[UIFont fontWithName:@"HelveticaNeue-Light" size:size] range:NSMakeRange(0, [text length])];
+    [attributedString addAttribute:NSForegroundColorAttributeName value:colour range:NSMakeRange(0, [text length])];
+    
+    return attributedString;
+}
+
+- (NSAttributedString *)changeString:(NSAttributedString *)attributedString toColour:(UIColor *)colour forRange:(NSRange)range {
+    NSMutableAttributedString *mutableAttributedString = (NSMutableAttributedString *)attributedString;
+    [mutableAttributedString addAttribute:NSForegroundColorAttributeName value:colour range:range];
+    
+    return (NSAttributedString *)mutableAttributedString;
+}
+
 #pragma mark - Calculations
+
+- (int)timeUntilDate:(NSDate *)date {
+    // Work out the time until date.
+    NSDate *currentDate = [NSDate date];
+    NSTimeInterval secondsBetween = [date timeIntervalSinceDate:currentDate];
+    int numberOfMinutes = secondsBetween / 60;
+    
+    // Increment numberOfMinutes so that '0 mins' appears as '1 min'.
+    numberOfMinutes++;
+    
+    return numberOfMinutes;
+}
 
 - (void)calculateDiscountsForBill:(NSNumber *)subtotalBill withDiscounts:(NSArray *)discounts {
     NSNumber *newBillPrice = subtotalBill;
