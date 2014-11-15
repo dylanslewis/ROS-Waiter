@@ -10,4 +10,6 @@
 
 @interface WaiterViewController : PFQueryTableViewController
 
+- (void)loginWaiterWithObjectID:(NSString *)objectID;
+
 @end

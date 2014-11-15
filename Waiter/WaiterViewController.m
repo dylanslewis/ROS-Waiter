@@ -109,15 +109,19 @@
     PFObject *selectedWaiter = [self objectAtIndexPath:indexPath];
     NSString *selectedWaiterObjectID = selectedWaiter.objectId;
     
+    [self loginWaiterWithObjectID:selectedWaiterObjectID];
+    
+    [self dismissViewControllerAnimated:YES completion:nil];
+}
+
+- (void)loginWaiterWithObjectID:(NSString *)objectID {
     // Using the selected waiter object ID, store the ID in NSUserDefaults.
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    [defaults setValue:selectedWaiterObjectID forKey:@"currentWaiterID"];
+    [defaults setValue:objectID forKey:@"currentWaiterID"];
     [defaults synchronize];
     
     // Inform the order View that there is a change to waiter.
     [[NSNotificationCenter defaultCenter] postNotificationName:@"newWaiterLoggedIn" object:nil];
-    
-    [self dismissViewControllerAnimated:YES completion:nil];
 }
 
 #pragma mark - Navigation

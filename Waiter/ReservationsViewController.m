@@ -26,8 +26,6 @@
     // Initially hide the table view, until objects are retrieved.
     [reservationsTableView setHidden:YES];
     
-    #warning add refresh control here
-    
     [self getParseData];
 }
 
@@ -55,7 +53,6 @@
 }
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-    #warning Does not currently group by date.
     
     return 1;
 }

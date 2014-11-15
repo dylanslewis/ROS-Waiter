@@ -15,8 +15,6 @@
 
 @property (weak, nonatomic) IBOutlet UIBarButtonItem *addOrderButton;
 
-@property (strong, nonatomic) PFObject *currentWaiter;
-
 @property (strong, nonatomic) UIAlertView *alertView;
 
 @property (strong, nonatomic) NSString *className;
@@ -184,7 +182,7 @@
 
 - (void)createNewOrderWithTableNumber:(NSString *)tableNumber {
     // Set basic Order attributes.
-    PFObject *order = [PFObject objectWithClassName:_className];
+    PFObject *order = [PFObject objectWithClassName:@"Order"];
     order[@"tableNumber"]=tableNumber;
     order[@"state"]=@"new";
     order[@"totalPrice"]=@0.00;

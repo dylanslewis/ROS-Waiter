@@ -12,8 +12,9 @@
 @interface OrdersViewController : UIViewController <UICollectionViewDataSource, UICollectionViewDelegate> {
     __weak IBOutlet UICollectionView *ordersCollectionView;
 }
-//<UITableViewDataSource, UITableViewDelegate> {
-//    __weak IBOutlet UITableView *ordersTableView;
-//}
+
+@property (strong, nonatomic) PFObject *currentWaiter;
+
+- (void)createNewOrderWithTableNumber:(NSString *)tableNumber;
 
 @end

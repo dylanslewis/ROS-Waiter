@@ -15,6 +15,8 @@
 
 @property (strong, nonatomic) PFObject *currentOrder;
 
-@property (strong, nonatomic) NSArray *selectedItems;
+@property (strong, nonatomic) NSMutableArray *selectedItems;
+
+- (void)applyNewDiscountToCover:(NSString *)coverage withType:(NSString *)type withAmount:(NSNumber *)amount;
 
 @end

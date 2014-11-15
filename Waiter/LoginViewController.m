@@ -121,9 +121,7 @@
                                                 PFUser *currentUser = [PFUser currentUser];
                                                 
                                                 if (currentUser) {
-                                                    [self performSegueWithIdentifier:@"loginUser" sender:nil];
-                                                } else {
-                                                    // show the signup or login screen
+                                                    [self performSegueWithIdentifier:@"loginUserSegue" sender:nil];
                                                 }
                                             } else {
                                                 // The login failed.

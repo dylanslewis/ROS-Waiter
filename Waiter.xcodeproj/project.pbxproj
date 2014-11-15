@@ -11,6 +11,18 @@
 		FC35006F19F57DD400A71D8B /* Parse.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FC35006C19F57DD300A71D8B /* Parse.framework */; };
 		FC35007019F57DD400A71D8B /* ParseFacebookUtils.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FC35006D19F57DD400A71D8B /* ParseFacebookUtils.framework */; };
 		FC5CA96B19CC4AD8000B9182 /* MenuCoursesViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FC5CA96A19CC4AD8000B9182 /* MenuCoursesViewController.m */; };
+		FC665FD11A161F47005162F9 /* Bolts.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FC35006B19F57DD300A71D8B /* Bolts.framework */; };
+		FC665FD21A161F47005162F9 /* Parse.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FC35006C19F57DD300A71D8B /* Parse.framework */; };
+		FC665FD31A161F47005162F9 /* ParseFacebookUtils.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FC35006D19F57DD400A71D8B /* ParseFacebookUtils.framework */; };
+		FC665FD41A161F58005162F9 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FCD0E3F819C0537F00767B4A /* SystemConfiguration.framework */; };
+		FC665FD51A161F5F005162F9 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FCD0E3FA19C0538700767B4A /* StoreKit.framework */; };
+		FC665FD61A161F65005162F9 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FCD0E3FC19C0538B00767B4A /* Security.framework */; };
+		FC665FD71A161F6D005162F9 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FCD0E3FE19C0539200767B4A /* QuartzCore.framework */; };
+		FC665FD81A161F74005162F9 /* MobileCoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FCD0E40019C0539A00767B4A /* MobileCoreServices.framework */; };
+		FC665FD91A161F7C005162F9 /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FCD0E40219C053A100767B4A /* CoreLocation.framework */; };
+		FC665FDA1A161F81005162F9 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FCD0E40419C053A600767B4A /* CoreGraphics.framework */; };
+		FC665FDB1A161F89005162F9 /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FCD0E40619C053AD00767B4A /* CFNetwork.framework */; };
+		FC665FDC1A161F90005162F9 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FCD0E40819C053B100767B4A /* AudioToolbox.framework */; };
 		FC88DC0B19D57C41003363C6 /* DishOptionsTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = FC88DC0A19D57C41003363C6 /* DishOptionsTableViewCell.m */; };
 		FC88DC0E19D57C5F003363C6 /* DishOptionsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FC88DC0D19D57C5F003363C6 /* DishOptionsViewController.m */; };
 		FC88DC1319D706CD003363C6 /* MenuDishesOptionsTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = FC88DC1219D706CD003363C6 /* MenuDishesOptionsTableViewCell.m */; };
@@ -148,6 +160,18 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FC665FDC1A161F90005162F9 /* AudioToolbox.framework in Frameworks */,
+				FC665FDB1A161F89005162F9 /* CFNetwork.framework in Frameworks */,
+				FC665FDA1A161F81005162F9 /* CoreGraphics.framework in Frameworks */,
+				FC665FD91A161F7C005162F9 /* CoreLocation.framework in Frameworks */,
+				FC665FD81A161F74005162F9 /* MobileCoreServices.framework in Frameworks */,
+				FC665FD71A161F6D005162F9 /* QuartzCore.framework in Frameworks */,
+				FC665FD61A161F65005162F9 /* Security.framework in Frameworks */,
+				FC665FD51A161F5F005162F9 /* StoreKit.framework in Frameworks */,
+				FC665FD41A161F58005162F9 /* SystemConfiguration.framework in Frameworks */,
+				FC665FD11A161F47005162F9 /* Bolts.framework in Frameworks */,
+				FC665FD21A161F47005162F9 /* Parse.framework in Frameworks */,
+				FC665FD31A161F47005162F9 /* ParseFacebookUtils.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -631,6 +655,7 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(SDKROOT)/Developer/Library/Frameworks",
 					"$(inherited)",
+					"$(PROJECT_DIR)",
 				);
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
@@ -650,6 +675,7 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(SDKROOT)/Developer/Library/Frameworks",
 					"$(inherited)",
+					"$(PROJECT_DIR)",
 				);
 				INFOPLIST_FILE = WaiterTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";

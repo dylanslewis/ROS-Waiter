@@ -10,4 +10,6 @@
 
 @interface LoginViewController : UIViewController
 
+- (void)loginUserWithUsername:(NSString *)username withPassword:(NSString *)password;
+
 @end

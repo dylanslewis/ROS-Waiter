@@ -16,4 +16,6 @@
 
 @property (strong, nonatomic) PFObject *currentOrder;
 
+- (void)getParseData;
+
 @end

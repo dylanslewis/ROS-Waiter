@@ -15,4 +15,8 @@
 @property (strong, nonatomic) PFObject *currentCourse;
 @property (strong, nonatomic) PFObject *currentOrder;
 
+- (void)addOrderItemToOrderForDish:(PFObject *)dish;
+
+- (void)addOrderItemToOrderWithDish:(PFObject *)dish withOption:(NSDictionary *)option;
+
 @end
