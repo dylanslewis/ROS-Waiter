@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="6250" systemVersion="14B17" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="VP2-05-ARe">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="6250" systemVersion="14B23" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="VP2-05-ARe">
     <dependencies>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="6244"/>
         <capability name="Alignment constraints with different attributes" minToolsVersion="5.1"/>
@@ -196,7 +196,7 @@
                         <outlet property="passwordField" destination="GE7-KD-zCV" id="5f4-qp-e9s"/>
                         <outlet property="spinner" destination="dhd-WT-Xsa" id="gPT-cC-19Q"/>
                         <outlet property="usernameField" destination="Coy-eJ-pVn" id="qgT-Q3-6Bw"/>
-                        <segue destination="VP2-05-ARe" kind="showDetail" identifier="loginUser" id="tyQ-Wq-wEK"/>
+                        <segue destination="VP2-05-ARe" kind="showDetail" identifier="loginUserSegue" id="tyQ-Wq-wEK"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="x5A-6p-PRh" sceneMemberID="firstResponder"/>
